@@ -1,0 +1,1202 @@
+# Interface
+
+## Chain Names
+
+The value of the `chain_name` parameter can be one of the following options (currently only supporting the following chains):
+
+*   Polygon
+*   Mainnet
+*   Mumbai
+*   Rinkeby
+*   Flowtest
+*   Flowmain
+*   TONmain
+*   TONtest
+
+> Note: For the FLOW network, the format of the `contract` parameter should be `${contract_addr}.${contract_name}`. For example, `0x8b148183c28ff88f.Gaia`.
+> 
+> Note: FLOW network only supports mainnet and testnet contracts on the NFT-catalog. [https://www.flow-nft-catalog.com/catalog/mainnet](https://www.flow-nft-catalog.com/catalog/mainnet)
+> 
+> Note: The CollectionId on the database for a Collection on FLOW must match the ID on the FLOW Catalog, otherwise it cannot be queried.
+
+### Authentication
+
+#### Signature Authentication
+
+Most chains can use signature authentication. Refer to each API for specific details.
+
+#### Header Authentication
+
+TON cannot sign offline, so header authentication is used:
+
+*   Add the `authorization: "TG Robot"` field to the header
+
+## Response Format
+
+The response format is standardized as follows:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+### code
+
+`code=1` indicates a successful request, while any other code indicates a failure.
+
+### error
+
+When `code!=1`, related error information will be included.
+
+### data
+
+The results of the request will be included in this field.
+
+## Social Media-Related APIs
+
+Twitter, Facebook, ...
+
+### Bind Social Media Account and User Address
+
+Method: POST
+
+URL: api/v1/bind-addr
+
+Params:
+
+```json
+{
+  "addr": "",
+  "tid": "",
+  "platform": "",
+  "chain_name": "",
+  "sig": ""
+}
+```
+
+> Note: The `sig` is the signature of `platform` and `tid`. Refer to [example.js](./example.js) for signature generation method. The `platform` should be one of {Twitter, Facebook, Instagram, Telegram}, and it is case-sensitive.
+> 
+> Note: If `chain_name` is not passed, it will default to `mainnet`.
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+> Note: An address can bind no more than ten social media accounts.
+
+### Record Binding Tweet
+
+Method: POST
+
+URL: api/v1/bind-addr/record
+
+Params:
+
+```json
+{
+  "addr": "",
+  "tid": "",
+  "platform": "",
+  "content_id": ""
+}
+```
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+> Note: Field `addr`, `platform`, and `tid` are required.
+> 
+> Note: If this API is called without a bound address, it will return normally, but there will be no record in the database.
+> 
+> Note: Duplicate bindings will not return an error and will update the bound `content_id`.
+
+### Unbind
+
+Method: POST
+
+URL: /api/v1/unbind-addr
+
+Parameters:
+
+```json
+{
+  "addr": "",
+  "tid": "",
+  "platform": "",
+  "chain_name": "",
+  "sig": ""
+}
+```
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+> Note: Field `addr`, `platform`, `tid`, `sig` are required.
+> 
+> Note: `sig` is the signature of `platform`+`tid`, the method for generating the signature can be found in [example.js](./example.js).
+> 
+> Note: If `chain_name` is not passed, it defaults to mainnet.
+
+### Query Binding Relationship
+
+Method: GET
+
+URL: /api/v1/bind-attr?addr=xxx&tid=xxx
+
+> Note: Both `addr` and `tid` are optional, but at least one is required.
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": [
+    {
+      "addr": "",
+      "tid": "",
+      "platform": ""
+    }
+  ]
+}
+```
+
+### Query Twitter Data Related to NFT
+
+Method: GET
+
+URL: /api/v1/twitter-nft/counts?nft=chain_name,contract,token_id
+
+> Note: `nft` is a comma-separated string that contains the three values, and the three fields are required.
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "retweet_count": 7,
+    "reply_count": 3,
+    "like_count": 38,
+    "quote_count": 1
+  }
+}
+```
+
+### Query Daily Snapshot of Twitter Data Related to NFT
+
+This API is used to draw a curve chart on the front end. It returns data from the specified date.
+
+Method: GET
+
+URL: /api/v1/twitter-nft/snapshots?nft=chain_name,contract,token_id&start=xxx&count=xxx
+
+> Note: `nft` is a comma-separated string that contains the three values, and the three fields are required.
+> 
+> Note: `nft` and `start` are required, `count` is optional and has a maximum value of 100 and a default value of 50.
+> 
+> Note: `start` is in date format, do not pass a timestamp.
+> 
+> Note: The last item returned is the latest data, with the time being the current time, not to the exact hour.
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "start": "2022-07-15 16:51:00",
+    "data": [
+      {
+        "snapshot_time": "2022-07-15T10:40:27.000Z",
+        "retweet_count": 7,
+        "reply_count": 3,
+        "like_count": 38,
+        "quote_count": 1
+      }
+    ]
+  }
+}
+```
+
+### Associate NFT with Tweets
+
+Method: POST
+
+url: api/v1/twitter-nft/add
+
+> note: An NFT can be associated with multiple tweets, and a tweet can be associated with multiple NFTs
+> 
+> note: Does not check if the NFT is one that we support
+
+params:
+
+```json
+{
+  "chain_name": "",
+  "contract": "",
+  "token_id": "",
+  "tid": "",
+  "user_img": "",
+  "user_id": "",
+  "user_name": "",
+  "t_content": ""
+}
+```
+
+return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": ""
+}
+```
+
+### Query associated NFTs and tweets
+
+Method: GET
+
+URL: api/v1/twitter-nft?tid=xxx&nft=chain_name,contract,token_id&page=xxx&gap=xxx
+
+> note: There are two parameters, `tid` and `nft`, at least one of which must be passed. If passed at the same time, it returns the tweets associated with nft
+> 
+> note: The nft parameter is a comma-separated string, with all three values required. If the parameter is passed but the format is incorrect, an error will be returned.
+
+return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": [
+    {
+      "chain_name": "",
+      "contract": "",
+      "token_id": "",
+      "tid": "",
+      "user_img": "",
+      "user_id": "",
+      "user_name": "",
+      "t_content": ""
+    }
+  ]
+}
+}
+```
+
+## Invitation code
+
+### Generate inivitation code
+
+Method: POST
+
+URL: /api/v1/referral/gen
+
+Parameters:
+
+```json
+{
+  "addr": "",
+  "platform": "",
+  "tid": ""
+}
+```
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": ""
+}
+```
+
+Note: The address and platform must be bound before an invitation code can be generated.
+
+### Accept invitation
+
+Method: POST
+
+URL: /api/v1/referral/accept
+
+Parameters:
+
+```json
+{
+  "addr": "",
+  "chain_name": "",
+  "referral": "",
+  "sig": ""
+}
+```
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+Note: `sig` is the signature of `referral`.
+
+Note: If `chain_name` is not passed, it defaults to Ethereum mainnet.
+
+### Get personal invitation code
+
+Method: GET
+
+URL: api/v1/referral?addr=xxx&platform=xxx&tid=xxx
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": "xxxxxx"
+}
+```
+
+### Get invitation code by address
+
+Method: GET
+
+URL: /api/v1/referral/code?addr=xxx
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": ""
+}
+```
+
+### Get invitation accept count
+
+Method: GET
+
+URL: /api/v1/referral/count?code=xxx
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": 10
+}
+```
+
+## NFT series
+
+### Retrieve NFT information based on Hash
+
+Each NFT has a unique identification that can be used to retrieve its information.
+
+Method: GET
+
+URL: api/v1/nft/:nft_id
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "chain_name": "",
+    "contract": "",
+    "token_id": "",
+    "uri": ""
+  }
+}
+```
+
+> Note: The calculation of nft_id is as follows:
+
+```js
+const {sha256} = require('js-sha256');
+let nft_id = sha256(chain_name + contract + token_id); // Please note that it is string concatenation, e.g.: sha.sha256("polygon"+'0xB01767bf57145D4762bd011366A877c8eB91c835'+'1')='bf92906fbebff13adda636d6a126d71746852d69ad4816f357b49f6476146811'
+```
+
+### Register a unique identifier for NFT
+
+Add an identification for NFT in the system.
+
+Method: POST
+
+URL: api/v1/nft/register
+
+Parameters:
+
+```json
+{
+  "chain_name": "",
+  "contract": "",
+  "token_id": ""
+}
+```
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": "b47bd1225b53cef83f96813e1627ae45dbcece67fc15ffed70176ceb2f48eea3"
+}
+```
+
+> Note: Return a unique identification. If it returns empty, it means the NFT does not exist in the backend system (possibly because the backend has not been synchronized, or the NFT does not belong to this owner).
+
+### Add NFT to the favorites list
+
+Method: POST
+
+URL: api/v1/favorite-nft
+
+Parameters:
+
+```json
+{
+  "chain_name": "",
+  "addr": "",
+  "contract": "",
+  "token_id": "",
+  "uri": "",
+  "fav": 0
+}
+```
+
+> Note: "fav" equals 0 means to cancel the collection, while 1 means to collect it. "chain_name", "contract", and "token_id" must be passed in.
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+### Get NFT favorites list
+
+Method: GET
+
+URL: api/v1/favorite?chain_name=xxx&addr=xxx&contract=xxx&page=xxx&gap=xxx
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+      "total": 10000, // Total number of records in the database, for pagination purpose
+      "data": [
+        {
+          "chain_name": "",
+          "addr": "",
+          "contract": "",
+          "token_id": "",
+          "uri": "" // Uniform Resource Identifier, IPFS index or other server resource
+        }
+      ]
+  }
+}
+```
+
+### Get NFT HODL list
+
+Method: GET
+
+URL: api/v1/nfts?chain_name=xxx&addr=xxx&contract=xxx&token_id=xxx&page=xxx&gap=xxx
+
+> Note: chain_name is required, addr and contract are required, token_id is optional. Note: If it is the FLOW network, addr must be passed, contract can be omitted, and no results will be returned if contract is not passed.
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+      "total": 10000, // Total number of records in the database, for pagination purpose
+      "data": [
+        {
+          "contract": "", // Contract address
+          "erc": "", // Protocol standard, 1155 or 721
+          "token_id": "", // 
+          "amount": "", // Quantity, 1155 NFTs with the same ID have more than one, while 721 only has one
+          "uri": "", // Uniform Resource Identifier, IPFS index or other server resource
+          "owner": "", // Owner, equal to the addr parameter passed
+          "update_block": "" // The block number where the NFT status was updated
+        }
+      ]
+  }
+}
+```
+
+### Query orders
+
+Method: GET
+
+URL: api/v1/orders?chain_name=xxx&order_id=xxx&status=xxx&contract=xxx&seller=xxx&buyer=xxx&token_id=xxx&page=xxx&gap=xxx
+
+> Note: chain_name is required. If none of the other parameters are passed, the latest unfulfilled orders will be returned by default.
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+      "total": 10000, // Total number of records in the database, for pagination purpose
+      "data": [
+        {
+          "order_id": "", // Order ID
+          "status": "", // Order status
+          "contract": "", // NFT contract address
+          "erc": "", // 721 or 1155
+          "token_id": "", // 
+          "uri": "",
+          "seller": "", // Order placing user's address
+          "sell_token": "", // ERC20 token address that the seller wants to receive for selling the NFT, if 0, it represents ETH
+          "init_amount": "", // Initial selling quantity
+          "min_price": "", // Minimum selling price
+          "max_price": "", // Maximum selling price
+          "start_block": "", // Block where the order price starts to decline
+          "duration": "", // Duration of the order price decline
+          "amount": "", // Remaining unsold NFT quantity
+          "final_price": "", // The price at the last transaction when the order is completely executed, 0 if not completely executed
+          "buyers": "", // All buyers
+          "update_block": "" // The block number where the order status was updated
+        }
+      ]
+  }
+}
+```
+
+> Note: Order status are: 
+> 0 - newly created
+> 1 - partially filled 
+> 2 - completely filled 
+> 3 - partially filled and then cancelled 
+> 4 - cancelled before being filled
+
+### Get NFT transaction records
+
+Method: GET
+
+URL: /api/v1/records?chain_name=xxx&contract=xxx&token_id=xxx&page=xxx&gap=xxx
+
+> Note: chain_name and contract parameters are required.
+
+Response:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+      "total": 10000, // Total number of records in the database, for pagination
+      "data": [
+        {
+          "order_id": "", // Order ID
+          "contract": "", // NFT contract address
+          "token_id": "", // Token ID
+          "seller": "",
+          "buyer": "",
+          "sell_token": "", // ERC20 token address received from selling NFT, if 0 then it represents ETH
+          "amount": "", // Transaction volume
+          "cash_amount": "", // Transaction amount
+          "deal_block": "", // Block number of the transaction
+          "tx_index":"", // Transaction sequence within the block
+          "log_index":"" // Position of the transaction event in the same transaction (not currently used in frontend)
+        }
+      ]
+  }
+}
+```
+
+### Get ERC-1155 URI resources
+
+Method: GET
+
+URL: /assets/erc-1155/:contracts/:token_id
+
+For example: http://localhost:7001/assets/erc-1155/0x7c19f2eb9e4524D5Ef5114Eb646583bB0Bb6C8F8/0.json
+
+> Note: token_id parameter must include the string ".json"
+
+Response:
+
+```json
+{
+  "name": "Sonet Airdrop NFT - 0",
+  "description": "This NFT is used to support Sonet Airdrop at testnet(mumbai)",
+  "decimals": "0",
+  "image": ""
+}
+```
+
+> Note: Since a JSON file is being queried, the response is returned directly as a JSON file without being wrapped in a common response format. Note: The image URL is returned in the "image" attribute of the response.
+
+## DAO series
+
+### Get user collection list
+
+NFTs owned by the user are displayed based on their collections. This endpoint returns information about all collections owned by the user.
+
+Method: GET
+
+URL: /api/v1/collection-list?chain_name=xxx&addr=xxx&page=xxx&gap=xxx
+
+> Note: addr and chain_name parameters are required.
+
+Response:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 10000, // Total number of records in the database, for pagination
+    "data": [
+      {
+        "chain_name":["mainnet"],
+        "id": "aaaa",
+        "name": "collection 1",
+        "img": "",
+        "dao": {
+            "name" : "",
+            "start_date": "timestamp",
+            "total_member": "2/200",
+            "facebook": "",
+            "twitter": ""
+        }
+      },
+      {
+        "chain_name":["mainnet","polygon"],
+        "id": "aaaa",
+        "name": "collection 2",
+        "img": "",
+        "dao": {
+            "name" : "",
+            "start_date": "timestamp",
+            "total_member": "2/200",
+            "facebook": "",
+            "twitter": ""
+        }
+      }
+    ]
+  }
+}
+```
+
+### Query NFTs in a Collection
+
+Method: GET
+
+URL: /api/v1/collection/nfts?chain_name=xxx&collection_id=xxx&addr=xxx&page=xxx&gap=xxx
+
+> Note: The `collection_id` parameter is required. The `addr` parameter specifies the user address. If passed, it indicates that all NFTs from this collection owned by the user will be returned. If not passed, it indicates that all NFTs from this collection will be returned. If the network is Flow, the `addr` parameter must be passed.
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+      "collection_id": "", // Collection ID
+      "collection_name": "", // Collection name
+      "collection_img": "", // Collection image
+      "total": 10000, // Total number of records in the database, used for pagination
+      "data": [
+        {
+          "contract": "", // Contract address
+          "erc": "", // Protocol standard, 1155 or 721
+          "token_id": "", // 
+          "amount": "", // Quantity, 1155 NFTs with the same ID have more than one quantity, while 721 NFTs only have one quantity
+          "uri": "", // Resource locator, IPFS index or other server resources
+          "owner": "", // Owner, equals to the `addr` parameter passed
+          "update_block": "" // The block number where the NFT status was updated
+        }
+      ]
+  }
+}
+```
+
+### Query Collection by NFT Contract
+
+Method: GET
+
+URL: /api/v1/collection?contract=xxx
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "id": "aaaa",
+    "name": "collection 1",
+    "img": "",
+    "dao": {
+      "name": "",
+      "start_date": "timestamp",
+      "total_member": "2/200",
+      "facebook": "",
+      "twitter": ""
+    }
+  }
+}
+```
+
+### Query Collection Detail
+
+Method: GET
+
+URL: /api/v1/collection/:collection_id
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "id": "aaaa",
+    "name": "collection 1",
+    "img": "",
+    "dao": {
+      "chain_name": "",
+      "name": "",
+      "start_date": "timestamp",
+      "total_member": "2/200",
+      "facebook": "",
+      "twitter": ""
+    }
+  }
+}
+```
+
+> Note: `collection_id` is the contract address. If the DAO does not exist, it will be null.
+
+### Get List of DAOs
+
+To retrieve a list of DAOs, use the following method:
+
+Method: GET
+
+URL: /api/v1/dao?chain_name=xxx&addr=xxx&name=xxx&page=xxx&gap=xxx
+
+> The "chain_name" parameter is required.
+> 
+> If the "addr" parameter is not passed, it returns all DAOs on that chain.
+> 
+> The "name" parameter is used to search for DAOs by name. If not passed, it will not filter by name.
+
+Response:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 10000, // Number of records in the database for paging purposes
+    "data": [
+      {
+            "chain_name":["mainnet"],
+            "id": "bbbbb",
+            "name" : "",
+            "img": "",
+            "start_date": "timestamp",
+            "total_member": "2/200",
+            "facebook": "",
+            "twitter": "",
+            "centralized": 0, // Whether it is centralized or not
+            "types": ["Investment"],
+            "tags": ["Decentralized Venture Fund","AAA"],
+            "status": "open",
+            "proposal_num": 2
+      },
+      {
+            "chain_name":["mainnet","polygon"],
+            "id": "ccccc",
+            "name" : "",
+            "img": "",
+            "start_date": "timestamp",
+            "total_member": "2/200",
+            "facebook": "",
+            "twitter": "",
+            "centralized": 1, // Whether it is centralized or not
+            "types": ["Investment"],
+            "tags": ["Decentralized Venture Fund","AAA"],
+            "status": "", // If there is no open proposal, the status will be blank
+            "proposal_num": 1
+      }
+    ]
+  }
+}
+```
+
+> Note: If the "addr" parameter is passed, no centralized DAOs will be returned. To query centralized DAOs, "addr" should not be passed.
+
+### Checking access for proposal creation
+
+To check whether the user has the permission to create a proposal, use the following method:
+
+Method: GET
+
+URL: /api/v1/proposal/permission?chain_name=xxx&dao=xxx&addr=xxx
+
+Response:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": true // true or false
+}
+```
+
+> Note: Pass the DAO ID and the proposer's address.
+> 
+> Note: If it is a centralized DAO, it will check whether the proposer is on the whitelist. If it is a decentralized DAO, it will check whether the proposer holds at least one NFT.
+
+### Get proposal list
+
+Version 1: To retrieve the proposal list for a given DAO ID, use the following method and URL: 
+
+Method: GET URL: /api/v1/proposal?dao=xxx&page=xxx&gap=xxx
+
+Response:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 10000, // Total number of records in the database, for pagination
+    "data": [
+      {
+            "id": "aaaa",
+            "title": "bbbbb",
+            "description" : "",
+            "start_time": "timestamp",
+            "end_time": "timestamp",
+            "update_time": 0, // Time of the last vote
+            "actived": 1, // Whether the proposal is still open for voting
+            "pending": 0, // Whether the proposal has not yet started
+            "ballot_threshold": "xxxxx",
+            "items": "10%,20%,30%", // Various options for the proposal
+            "results": "1,23,33", // Number of votes for each option
+            "voter_type": 1 // 1: one address, one vote; 2: one NFT, one vote; 3: one SON, one vote
+      }
+    ]
+  }
+}
+```
+
+Version 2: To retrieve the proposal list for a given DAO ID, use the following URL: 
+
+URL: /api/v2/proposal?dao=xxx&page=xxx&gap=xxx
+
+Response: Items and results in the response are now arrays. Other than that, the response format is the same as version 1.
+
+Version 3: To retrieve the proposal list for a given DAO ID, use the following method and URL: 
+
+Method: GET URL: /api/v3/proposal?dao=xxx&page=xxx&gap=xxx
+
+Response:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 10000, // Total number of records in the database, for pagination
+    "passed":3, // Number of proposals that have passed
+    "failed":4, // Number of proposals that have failed
+    "actived": 4, // Number of proposals that are currently open for voting
+    "pending": 4, // Number of proposals that have not yet started
+    "data": [
+      {
+            "id": "aaaa",
+            "title": "bbbbb",
+            "description" : "",
+            "start_time": "timestamp",
+            "end_time": "timestamp",
+            "actived": 1, // Whether the proposal is still open for voting
+            "pending": 0, // Whether the proposal has not yet started
+            "update_time": 0, // Time of the last vote
+            "ballot_threshold": "xxxxx",
+            "items": ["10%","20%","30%"], // Various options for the proposal
+            "results": ["1","23","33"], // Number of votes for each option
+            "voter_type": 1 // 1: one address, one vote; 2: one NFT, one vote; 3: one SON, one vote; 5: one TON, one vote
+      }
+    ]
+  }
+}
+```
+
+### Check if a user has voted for a proposal
+
+Method: GET
+
+URL: /api/v1/proposal/votes?collection_id=xxx&proposal_id=xxx&addr=xxxx
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+      "collection_id": "0x917be393EeF337f280eF2000430F16c1340CAcAd",
+      "id": "0xbe48e948a48eafbdddcf6b1cd2d546cfbeb1d6325238050f263fc0e1b309332c",
+      "voter": "0xBdfc41e26FfcAa992790D321639008f3740Bd951",
+      "item": "20%", // Voting option
+      "votes": "98000000000" // Number of votes cast
+  }
+}
+```
+
+Note: If the user has not voted, the "data" field will be null.
+
+### Create a proposal
+
+Create a proposal
+
+Method: POST
+
+URL: /api/v1/proposal/create
+
+Parameters:
+
+```json
+{
+  "chain_name": "mumbai", // Chain name
+  "creator": "", // Creator address
+  "snapshot_block": 777777, // Snapshot block of the proposal area
+  "collection_id": "",
+  "title": "", // Maximum 64 characters
+  "description": "0", // Maximum 10240 characters
+  "start_time": 123211232113, // Millisecond timestamp
+  "end_time": 123211232113, // Millisecond timestamp
+  "ballot_threshold": 0,
+  "items": ["10%","20%","30%"], // Voting options
+  "voter_type": 1,
+  "sig": "xxxxxxx"
+}
+```
+
+> Note: sig = web3.eth.sign(web3.utils.soliditySha3("" + snapshot_block, collection_id, title, description, "" +
+>
+> start_time, "" + end_time, "" + ballot_threshold, items.join('|'),"" + voter_type), accountAddr)
+> 
+> The signature is calculated by signing the soliditySha3 hash of all creation parameters. Make sure that the parameters are in the correct order. When calling the soliditySha3 method, if the parameter is an integer, it needs to be converted to a string.
+> 
+> If it's a Flow signature, just sign the result of the soliditySha3 directly. For example: let msg = Buffer.from("0x9ce6944ad37aa3650fd401ad5215dbbc4df37195fa15559ec976b86f4810f744").toString('hex'); fcl.currentUser().signUserMessage(msg).then(res=>{ console.log(JSON.stringify(res)); })
+>
+> The result of the sig is like: "\[{"f_type":"CompositeSignature","f_vsn":"1.0.0","addr":"0x5f27f57d592aa038","keyId":1,"signature":"469dcd5d893c970c2323ac5c1790f1b49b18ce92c18969749d927b76812fa81370e6561f022f95d9677dfb07c1a67ee7cc30bd519086f6098ff25dbcf7575519"}\]"
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+### Vote
+
+Vote for a proposal
+
+Method: POST
+
+URL: /api/v1/proposal/vote
+
+Params:
+
+```json
+{
+  "chain_name": "", // chain name
+  "voter": "", // voter address
+  "collection_id": "",
+  "proposal_id": "",
+  "item": "approve", // select an item from the items array
+  "sig": "xxxxxxx" // sign web3.utils.soliditySha3(proposal_id + item)
+}
+```
+
+> Note: The signature is the same as in `createProposal`.
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+### Create TG Group DAO
+
+Create a DAO for a Telegram group.
+
+Method: POST
+
+URL: /api/v1/dao/tg/create
+
+Params:
+
+```json
+{
+  "chain_name": "", // Chain name, allows users to choose whether to create on the TON test network or mainnet
+  "creator":"", // TON address of the creator
+  "contract": "", // NFT contract address
+  "collection_name": "",
+  "collection_id": "", // Primary key, ensures each DAO is unique, use the group account name
+  "collection_image": "",
+  "dao_name":"", // Use the group name
+  "start_date": 12112121, // Timestamp in milliseconds
+  "total_member": 121212, // Number of members in the DAO, pass the current number of group members
+  "facebook":"", // DAO's Facebook account, if applicable
+  "twitter":"", // DAO's Twitter account, if applicable
+}
+```
+
+### Check available ballot number
+
+To determine whether a user can vote on a proposal, follow the process below:
+
+*   Check if the user has already voted using the `check if a user has voted for a proposal` API.
+*   Call this API to check the number of votes the user has available:
+
+#### For DAOs based on smartcontracts
+
+Method: GET
+
+URL: /api/v1/proposal/votes/num?chain_name=xxx&&collection_id=xxx&voter=xxx&voter_typer=xxx&snapshot_block=xxx
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": 100
+}
+```
+
+> `voter_typer` can only be 1 (one ballot per address) or 2 (one ballot per NFT)
+> 
+> If it is a 1155 NFT, the number of votes will be based on the number of 1155 NFTs owned by that address.
+> 
+> Other vote counting methods are not currently supported by this API.
+
+#### For DAOs stored in Sonet servers
+
+Other chains have one address, one vote. Only for the Flow chain, use this API to retrieve the number of votes available to the user.
+
+Method: GET
+
+URL: /api/v1/proposal/votes/num?chain_name=xxx&&collection_id=xxx&voter_typer=xxx&proposal_id=xxx&voter=xxx
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "votes": 10, // Number of votes
+    "tokenIds": [ // NFTs that have not yet been voted on by the user
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ]
+  }
+}
+```
+
+> If it is one address, one vote, the value of `votes` will be 1 (as long as the user has at least one unvoted NFT).
+> 
+> An NFT can only be voted on once. If NFT A has been voted on by user A and then transferred to user B, user B cannot vote on NFT A.
+> 
+> For the Flow chain, `snapshot_block` is not required but `proposal_id` must be provided.
+> 
+> Although an address may receive new NFTs after voting, it cannot vote again after receiving new NFTs.
+
+
+## Web2 statistics
+
+### Querying Statistical Data
+
+Method: GET
+
+URL: /api/v1/statistic
+
+Return:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "time": "Milliseconds timestamp, this field can be ignored",
+    "total_daos": 10,
+    "total_proposals": 100,
+    "total_audiences": 9999999
+  }
+}
+```
