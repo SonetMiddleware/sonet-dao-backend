@@ -173,7 +173,8 @@ class DAOService extends Service {
             for (const nft of result.data) {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
-                    `replace into nft_reg
+                    `replace
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             result.collection_id = collectionInfo.collection_id;
@@ -192,7 +193,8 @@ class DAOService extends Service {
             for (const nft of result.data) {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
-                    `replace into nft_reg
+                    `replace
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             result.collection_id = collectionInfo.collection_id;
@@ -491,6 +493,15 @@ class DAOService extends Service {
         return await this.app.mysql.get('app').get('voter', {collection_id: collectionId, id: proposalId, voter});
     }
 
+    async queryVotesList(collectionId, proposalId) {
+        const totalRes = await this.app.mysql.get('app').query(
+            'select count(*) as total from voter where collection_id=? and proposal_id=?', collectionId, proposalId);
+        const total = totalRes[0]["total"]
+        const dataRes = await this.app.mysql.get('app').query(
+            'select voter, item, votes as num from voter where collection_id=? and proposal_id=?', collectionId, proposalId);
+        return {total: total, data: dataRes};
+    }
+
     async queryProposalPermission(chainName, collection_id, creatorAddr) {
         // query dao
         const dao = await this.app.mysql.get('chainData').get('collection', {collection_id: collection_id});
@@ -539,10 +550,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count(*) as proposal_num
-                                                from ${appDataDBName}.proposal
-                                                group by collection_id) p on c.collection_id = p.collection_id
-                 set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count (*) as proposal_num
+                     from ${appDataDBName}.proposal
+                     group by collection_id) p
+                 on c.collection_id = p.collection_id
+                     set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);

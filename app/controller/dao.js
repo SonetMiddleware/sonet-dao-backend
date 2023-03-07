@@ -109,6 +109,12 @@ class DAOController extends Controller {
             param.addr));
     }
 
+    async queryVotesList() {
+        const {ctx} = this;
+        let param = ctx.query;
+        ctx.body = data.newNormalResp(await ctx.service.daoService.queryVotesList(param.collection_id, param.proposal_id));
+    }
+
     async queryProposalPermission() {
         const {ctx} = this;
         let param = ctx.query;
