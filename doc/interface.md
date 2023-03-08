@@ -694,61 +694,32 @@ Response:
 
 Method: POST
 
-URL: api/v1/nft/collection/gen
+URL: /api/v1/nft/collection/gen
 
 params:
 
 ```json
 {
+  "chain_name": "TONtest",
   "owner": "ownerAddr",
-  "royalty": 0,
+  "royalty": 0.1,
   "royalty_address": "royaltyAddress",
-  "name": "collection name",
-  "image": "image url",
-  "desc": "collection description",
-  "social_links": [
-    "",
-    "",
-    "",
-    "no more than 10 links"
-  ]
-}
-```
-
-returns:
-
-```json
-{
-  "value": "0.1",
-  "to": "collectionAddress",
-  "state_init": ""
-}
-```
-
-> note: `to` is collection address, stateInit is base64 serialized stateInit
-
-### Gen NFT Item Mint Transaction for TON
-
-Method: POST
-
-URL: api/v1/nft/item/gen
-
-params:
-
-```json
-{
-  "code": "",
-  "error": "",
-  "data": {
-    "owner": "ownerAddr",
-    "uri": "imageUri",
-    "collection": "collectionAddress"
+  "metadata": {
+    "name": "collection name",
+    "image": "image url",
+    "cover_image": "cover image url",
+    "description": "collection description",
+    "social_links": [
+      "",
+      "",
+      "",
+      "no more than 10 links"
+    ]
   }
 }
-
 ```
 
-> note: `collection` is collection address
+> note: metadata.name should be same as dao collection name, and should be unique
 
 returns:
 
@@ -758,6 +729,62 @@ returns:
   "error": "",
   "data": {
     "value": "0.1",
+    "to": "collectionAddress",
+    "state_init": ""
+  }
+}
+```
+
+> note: `to` is collection address, stateInit is base64 serialized stateInit
+
+### Gen NFT Item Mint Transaction for TON
+
+Method: POST
+
+URL: /api/v1/nft/item/gen
+
+params:
+
+```json
+ {
+  "chain_name": "TONtest",
+  "owner": "ownerAddr",
+  "collection": {
+    "name": "collection name",
+    "addr": "collection address"
+  },
+  "metadata": {
+    "name": "collection name",
+    "image": "image url",
+    "description": "collection description",
+    "attributes": [
+      {
+        "trait_type": "Material",
+        "value": "Wool fabric"
+      },
+      {
+        "trait_type": "Hat",
+        "value": "Top hat"
+      }
+    ]
+  }
+}
+
+```
+
+> note: metadata.name should be same as dao collection name, and should be unique
+>
+> note: should be invoked after collection contract deployed
+
+returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "value": "0.1",
+    "token_id": 10,
     "payload": ""
   }
 }
@@ -771,7 +798,9 @@ return the metadata for [getgems specified](https://github.com/getgems-io/nft-co
 
 Method: GET
 
-url: /assets/ton-collection/:collection_name/metadata.json
+collection URI: /assets/ton-collection/:chain_name/:collection_name
+
+item URI: /assets/ton-collection/:chain_name/:collection_name/:token_id
 
 ## DAO series
 

@@ -55,10 +55,16 @@ function getNodeUrl(chainName) {
         return 'https://eth-rinkeby.g.alchemy.com/v2/' + env.ALCHEMY_RINKEBY;
     } else if (chainName === CHAIN_NAME_MUMBAI) {
         return 'https://polygon-mumbai.g.alchemy.com/v2/' + env.ALCHEMY_MUMBAI;
+    } else if (chainName === CHAIN_NAME_TON_TESTNET) {
+        return "https://testnet.toncenter.com/api/v2/jsonRPC"
+    } else if (chainName === CHAIN_NAME_TON_MAINNET) {
+        return "https://toncenter.com/api/v2/jsonRPC"
     } else {
         return ""
     }
 }
+
+const TON_CENTER_API_KEY = env.TON_CENTER_API;
 
 module.exports = {
     zeroAddr,
@@ -89,6 +95,8 @@ module.exports = {
 
     getExplorer,
     getNodeUrl,
+
+    TON_CENTER_API_KEY,
 
     ERC721,
     ERC1155

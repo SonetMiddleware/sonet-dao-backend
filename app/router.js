@@ -10,6 +10,8 @@ module.exports = app => {
     router.post('/api/v1/unbind-addr', controller.socialMedia.unbind);
     router.post('/api/v1/favorite-nft', controller.nft.favoriteNFT);
     router.post('/api/v1/nft/register', controller.nft.regNFT);
+    router.post('/api/v1/nft/collection/gen', controller.nft.genTONCollectionDeployTx);
+    router.post('/api/v1/nft/item/gen', controller.nft.genTONNFTItemMintTx);
     router.post('/api/v1/proposal/create', controller.dao.createProposal);
     router.post('/api/v1/proposal/vote', controller.dao.vote);
     router.post('/api/v1/twitter-nft/add', controller.socialMedia.addTwitterNFT);
@@ -34,6 +36,7 @@ module.exports = app => {
     router.get('/api/v3/proposal', controller.dao.queryProposalListV3);
     router.get('/api/v1/proposal/permission', controller.dao.queryProposalPermission);
     router.get('/api/v1/proposal/votes', controller.dao.queryVotes);
+    router.get('/api/v1/votes', controller.dao.queryVotesList);
     router.get('/api/v1/proposal/votes/num', controller.dao.getVotes);
     router.get('/api/v1/twitter-nft/counts', controller.socialMedia.getNFTTwitterCounts);
     router.get('/api/v1/twitter-nft/snapshots', controller.socialMedia.getNFTTwitterSnapshot);
@@ -41,4 +44,6 @@ module.exports = app => {
     router.get('/api/v1/statistic', controller.statistic.getData);
 
     router.get('/assets/erc-1155/:contracts/:token_id', controller.assetsERC1155.getURIAssets);
+    router.get('/assets/ton-collection/:chain_name/:collection_name', controller.nft.getTONCollectionMetadata);
+    router.get('/assets/ton-collection/:chain_name/:collection_name/:token_id', controller.nft.getTONCollectionItemMetadata);
 };

@@ -87,6 +87,58 @@ class NFTController extends Controller {
         ctx.body = data.newNormalResp(await ctx.service.nftService.queryNFT(param.chain_name, param.addr,
             param.contract, param.token_id, limit, offset));
     }
+
+    async getTONCollectionMetadata() {
+        const {ctx} = this;
+        let collectionName = ctx.params.collection_name;
+        let chain_name = ctx.params.chain_name;
+        ctx.body = await ctx.service.nftService.getTONCollectionMetadata(chain_name, collectionName);
+    }
+    async getTONCollectionItemMetadata() {
+        const {ctx} = this;
+        let collectionName = ctx.params.collection_name;
+        let chain_name = ctx.params.chain_name;
+        let token_id = ctx.params.token_id;
+        ctx.body = await ctx.service.nftService.getTONCollectionItemMetadata(chain_name, collectionName, token_id);
+    }
+
+    async genTONCollectionDeployTx() {
+        const {ctx} = this;
+        let param = ctx.request.body;
+        ctx.validate({
+            chain_name: 'chainName'
+        }, param);
+        ctx.validate({
+            owner: 'address'
+        }, param);
+        ctx.validate({
+            royalty_address: 'address'
+        }, param);
+        try {
+            ctx.body = data.newNormalResp(await ctx.service.nftService.genTONCollectionDeployTx(param));
+        } catch (e) {
+            ctx.body = data.newResp(constant.RESP_CODE_NORMAL_ERROR, e.toString())
+        }
+    }
+
+    async genTONNFTItemMintTx() {
+        const {ctx} = this;
+        let param = ctx.request.body;
+        ctx.validate({
+            chain_name: 'chainName'
+        }, param);
+        ctx.validate({
+            owner: 'address'
+        }, param);
+        ctx.validate({
+            addr: 'address'
+        }, param.collection);
+        // try {
+        ctx.body = data.newNormalResp(await ctx.service.nftService.genTONNFTItemMintTx(param));
+        // } catch (e) {
+        //     ctx.body = data.newResp(constant.RESP_CODE_NORMAL_ERROR, e.toString())
+        // }
+    }
 }
 
 module.exports = NFTController;

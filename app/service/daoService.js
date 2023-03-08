@@ -119,6 +119,7 @@ class DAOService extends Service {
         if (!collection) {
             return {};
         }
+        const contractMap = await this.app.mysql.get('chainData').get('collection_map', {collection_id: collectionId});
         return {
             chain_name: this.split(collection.chain_name, ","),
             id: collection.collection_id,
@@ -130,7 +131,8 @@ class DAOService extends Service {
                 total_member: collection.total_member,
                 facebook: collection.facebook,
                 twitter: collection.twitter
-            } : null
+            } : null,
+            contract: contractMap === undefined ? "" : contractMap.contract
         };
     }
 
@@ -495,10 +497,10 @@ class DAOService extends Service {
 
     async queryVotesList(collectionId, proposalId) {
         const totalRes = await this.app.mysql.get('app').query(
-            'select count(*) as total from voter where collection_id=? and proposal_id=?', collectionId, proposalId);
+            'select count(*) as total from voter where collection_id=? and id=?', [collectionId, proposalId]);
         const total = totalRes[0]["total"]
         const dataRes = await this.app.mysql.get('app').query(
-            'select voter, item, votes as num from voter where collection_id=? and proposal_id=?', collectionId, proposalId);
+            'select voter, item, votes as num from voter where collection_id=? and id=?', [collectionId, proposalId]);
         return {total: total, data: dataRes};
     }
 

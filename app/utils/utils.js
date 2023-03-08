@@ -9,7 +9,7 @@ const fcl = require("@onflow/fcl");
 const {config} = require("@onflow/fcl");
 const flowCatalog = require("flow-catalog");
 const flowCADUT = require("@onflow/flow-cadut");
-const {Address} = require("ton-core");
+const {Address, beginCell} = require("ton-core");
 
 function parsePageParamToDBParam(page, gap) {
     if (!page) {
@@ -468,6 +468,22 @@ function verifyTGRobot(req) {
     return req.headers.authorization === "TG Robot"
 }
 
+function createTONNFTItemMintBody(params) {
+    let uri = Buffer.from(new TextEncoder().encode(encodeURI(params.itemContentUri)));
+    console.log(uri.toString());
+    return beginCell().storeUint(1, 32)
+        .storeUint(params.queryId || 0, 64)
+        .storeUint(params.itemIndex, 64)
+        .storeCoins(params.amount)
+        .storeRef(
+            beginCell()
+                .storeAddress(Address.parse(params.itemOwnerAddress))
+                .storeRef(
+                    beginCell().storeBuffer(uri).endCell()
+                ).endCell()
+        ).endCell().toBoc().toString("base64");
+}
+
 module.exports = {
     parsePageParamToDBParam,
 
@@ -485,5 +501,5 @@ module.exports = {
     verifyFlowSig,
 
     getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT,
-    isTONAddr, isTONNetwork, verifyTonSig, verifyTGRobot
+    isTONAddr, isTONNetwork, verifyTonSig, verifyTGRobot, createTONNFTItemMintBody
 }

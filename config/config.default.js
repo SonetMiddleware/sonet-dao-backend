@@ -51,3 +51,5 @@ exports.schedule = {
 };
 
 exports.updateProposalNum = true;
+
+exports.uriPrefix = "https://apiv2-test.platwin.io/assets/ton-collection/"
