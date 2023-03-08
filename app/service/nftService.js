@@ -164,8 +164,8 @@ class NFTService extends Service {
             ownerAddress: new TonWeb.Address(params.owner),
             royalty: params.royalty,
             royaltyAddress: new TonWeb.Address(params.royalty_address),
-            collectionContentUri: `${this.app.config.uriPrefix}/${params.chain_name}/${params.metadata.name}`,
-            nftItemContentBaseUri: `${this.app.config.uriPrefix}/${params.chain_name}/`,
+            collectionContentUri: `${this.app.config.uriPrefix}${params.chain_name}/${params.metadata.name}`,
+            nftItemContentBaseUri: `${this.app.config.uriPrefix}${params.chain_name}/${params.metadata.name}/`,
             nftItemCodeHex: NftItem.codeHex,
         }
         const tonWebProvider = new TonWeb.HttpProvider(getNodeUrl(params.chain_name), {apiKey: TON_CENTER_API_KEY});
