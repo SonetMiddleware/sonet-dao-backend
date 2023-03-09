@@ -534,7 +534,7 @@ class DAOService extends Service {
         }
         await this.app.mysql.get('app').insert('proposal', {
             collection_id,
-            id: Web3.utils.soliditySha3(title + description),
+            id: Web3.utils.soliditySha3(collection_id + title + description),
             creator: creatorAddr,
             snapshot_block,
             title,
