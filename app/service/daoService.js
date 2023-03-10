@@ -637,6 +637,9 @@ class DAOService extends Service {
         let tableName;
         if (isFlowNetwork(chainName)) {
             let nftIds = await getFlowNFTIdsOfAccount(chainName, voter);
+            if (!nftIds) {
+                return {votes: 0, tokenIds: []};
+            }
             collectionNFTIds = nftIds[collectionId];
             tableName = "flow_voter_records";
         } else {

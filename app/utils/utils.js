@@ -70,7 +70,7 @@ async function getTwitterCounts(tIds) {
     return call.then(async resp => {
         const data = resp.data;
         if (!data || data.length === 0) {
-            throw new Error(`cannot get tid info ${tIds.join(",")}`)
+            throw new Error(`cannot get tid info, resp is ${resp}`)
         }
         const result = new Map();
         for (const twitter of data) {
@@ -102,7 +102,7 @@ async function getTwitterUserFollowers(userNames) {
     return call.then(async resp => {
         const data = resp.data;
         if (!data || data.length === 0) {
-            throw new Error(`cannot get user info ${userNames.join(',')}`)
+            throw new Error(`cannot get user info, resp is ${resp}`)
         }
         let result = 0;
         for (const user of data) {

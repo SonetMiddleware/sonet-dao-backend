@@ -10,17 +10,17 @@ module.exports = agent => {
         for (const t of allTwitters) {
             requestIDs.push(t.tid);
             count++;
-            if (count === 100) { // api required up to 100 comma-separated Tweet IDs.
+            if (count === 50) { // api required up to 100 comma-separated Tweet IDs.
                 try {
                     let results = await getTwitterCounts(requestIDs);
                     for (const tid of results.keys()) {
                         await appData.update('twitter_counts', results.get(tid), {where: {tid: tid}});
                     }
-                    requestIDs = [];
-                    count = 0;
                 } catch (e) {
                     agent.logger.error(`update twitter_counts failed, err ${e}`)
                 }
+                requestIDs = [];
+                count = 0;
             }
         }
         try {

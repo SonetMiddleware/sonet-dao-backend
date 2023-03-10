@@ -36,7 +36,7 @@ function getExplorer(chainName) {
     if (chainName === CHAIN_NAME_MAINNET) {
         return "https://api.etherscan.io/api";
     } else if (chainName === CHAIN_NAME_POLYGON) {
-        return 'https://api-testnet.polygonscan.com/api';
+        return 'https://api.polygonscan.com/api';
     } else if (chainName === CHAIN_NAME_RINKEBY) {
         return 'https://api-rinkeby.etherscan.io/api';
     } else if (chainName === CHAIN_NAME_MUMBAI) {
