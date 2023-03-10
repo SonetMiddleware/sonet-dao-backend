@@ -182,7 +182,7 @@ class DAOController extends Controller {
         // check snapshot block
         if (!isFlowNetwork(param.chain_name) && !isTONNetwork(param.chain_name)) {
             let snapshotTime = await estimateSnapshotTime(param.chain_name, param.snapshot_block);
-            if (snapshotTime < +param.start_time || snapshotTime > +param.end_time) {
+            if (snapshotTime > +param.end_time) {
                 ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "illegal param: snapshot_block");
                 return;
             }
