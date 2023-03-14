@@ -24,6 +24,7 @@ module.exports = app => {
     router.get('/api/v1/referral/code', controller.socialMedia.getBindCode);
     router.get('/api/v1/nfts', controller.nft.queryNFT);
     router.get('/api/v1/nft/:nft_id', controller.nft.queryNFTById);
+    router.get('/api/v1/collection/created-by', controller.nft.queryCreatedCollection);
     router.get('/api/v1/orders', controller.orders.queryOrder);
     router.get('/api/v1/records', controller.records.queryRecord);
     router.get('/api/v1/collection-list', controller.dao.queryCollectionList);

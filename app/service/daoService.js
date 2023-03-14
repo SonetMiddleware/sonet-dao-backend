@@ -59,7 +59,10 @@ class DAOService extends Service {
         const mysql = this.app.mysql.get('chainData');
         let total, result;
         if (isFlowNetwork(chainName) || isTONNetwork(chainName)) {
-            let collectionIds = await this.getTONAndFlowUserAllCollectionIds(chainName, addr)
+            let collectionIds = await this.getTONAndFlowUserAllCollectionIds(chainName, addr);
+            if (collectionIds.length === 0) {
+                return {total: 0, data: []}
+            }
             let data = await mysql.select('collection', {
                 where: {
                     chain_name: chainName,
@@ -176,12 +179,14 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                    into nft_reg
+                         into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
-            result.collection_id = collectionInfo.collection_id;
-            result.collection_name = collectionInfo.collection_name;
-            result.collection_img = collectionInfo.collection_img;
+            if (collectionInfo) {
+                result.collection_id = collectionInfo.collection_id;
+                result.collection_name = collectionInfo.collection_name;
+                result.collection_img = collectionInfo.collection_img;
+            }
             return result;
         }
         if (isTONNetwork(chain_name)) {
@@ -196,12 +201,14 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                    into nft_reg
+                         into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
-            result.collection_id = collectionInfo.collection_id;
-            result.collection_name = collectionInfo.collection_name;
-            result.collection_img = collectionInfo.collection_img;
+            if (collectionInfo) {
+                result.collection_id = collectionInfo.collection_id;
+                result.collection_name = collectionInfo.collection_name;
+                result.collection_img = collectionInfo.collection_img;
+            }
             return result;
         }
         const contracts = items.map((item) => item.contract);
@@ -552,11 +559,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count (*) as proposal_num
-                     from ${appDataDBName}.proposal
-                     group by collection_id) p
-                 on c.collection_id = p.collection_id
-                     set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count(*) as proposal_num
+                                                from ${appDataDBName}.proposal
+                                                group by collection_id) p
+                    on c.collection_id = p.collection_id
+                 set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);

@@ -802,6 +802,30 @@ collection URI: /assets/ton-collection/:chain_name/:collection_name
 
 item URI: /assets/ton-collection/:chain_name/:collection_name/:token_id
 
+### Get TON NFT Collection Created by User
+
+Method: GET
+
+URL: /api/v1/collection/created-by?chain_name=xxx&creator=xxx
+
+Response:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 1,
+    "data": [
+      {
+        "name": "So Cat Test",
+        "addr": "EQCkeUfuGycIp6EJN3LdqhdlOd7aNdLEqxk5LnQYij1Q6PpT"
+      }
+    ]
+  }
+}
+```
+
 ## DAO series
 
 ### Get user collection list

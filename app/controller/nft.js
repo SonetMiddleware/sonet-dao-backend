@@ -94,12 +94,25 @@ class NFTController extends Controller {
         let chain_name = ctx.params.chain_name;
         ctx.body = await ctx.service.nftService.getTONCollectionMetadata(chain_name, collectionName);
     }
+
     async getTONCollectionItemMetadata() {
         const {ctx} = this;
         let collectionName = ctx.params.collection_name;
         let chain_name = ctx.params.chain_name;
         let token_id = ctx.params.token_id;
         ctx.body = await ctx.service.nftService.getTONCollectionItemMetadata(chain_name, collectionName, token_id);
+    }
+
+    async queryCreatedCollection() {
+        const {ctx} = this;
+        let param = ctx.query;
+        ctx.validate({
+            chain_name: 'chainName'
+        }, param);
+        ctx.validate({
+            creator: 'address'
+        }, param);
+        ctx.body = await ctx.service.nftService.queryCreatedCollection(param.chain_name, param.creator);
     }
 
     async genTONCollectionDeployTx() {

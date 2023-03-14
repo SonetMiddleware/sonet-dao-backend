@@ -25,6 +25,7 @@ class NFTService extends Service {
         return nft_id;
     }
 
+    // TODO: support TON
     async queryNFT(chainName, addr, contract, tokenId, limit, offset) {
         const mysql = this.app.mysql.get('chainData');
         if (isFlowNetwork(chainName)) {
@@ -144,6 +145,17 @@ class NFTService extends Service {
     }
 
     async genTONCollectionDeployTx(params) {
+        const createCollectionParams = {
+            ownerAddress: new TonWeb.Address(params.owner),
+            royalty: params.royalty,
+            royaltyAddress: new TonWeb.Address(params.royalty_address),
+            collectionContentUri: `${this.app.config.uriPrefix}${params.chain_name}/${params.metadata.name}`,
+            nftItemContentBaseUri: `${this.app.config.uriPrefix}${params.chain_name}/${params.metadata.name}/`,
+            nftItemCodeHex: NftItem.codeHex,
+        }
+        const tonWebProvider = new TonWeb.HttpProvider(getNodeUrl(params.chain_name), {apiKey: TON_CENTER_API_KEY});
+        let tonWebCollection = new NftCollection(tonWebProvider, createCollectionParams);
+        const nftCollectionAddress = (await tonWebCollection.getAddress()).toString(true, true)
         let existed = await this.app.mysql.get('app').select('ton_collection_metadata', {
             where: {
                 is_mainnet: params.chain_name === CHAIN_NAME_TON_MAINNET,
@@ -157,26 +169,17 @@ class NFTService extends Service {
                 image: params.metadata.image,
                 cover_image: params.metadata.cover_image,
                 description: params.metadata.description,
-                social_links: params.metadata.social_links.join(",")
+                social_links: params.metadata.social_links.join(","),
+                creator: params.owner,
+                addr: nftCollectionAddress,
             });
         }
-        const createCollectionParams = {
-            ownerAddress: new TonWeb.Address(params.owner),
-            royalty: params.royalty,
-            royaltyAddress: new TonWeb.Address(params.royalty_address),
-            collectionContentUri: `${this.app.config.uriPrefix}${params.chain_name}/${params.metadata.name}`,
-            nftItemContentBaseUri: `${this.app.config.uriPrefix}${params.chain_name}/${params.metadata.name}/`,
-            nftItemCodeHex: NftItem.codeHex,
-        }
-        const tonWebProvider = new TonWeb.HttpProvider(getNodeUrl(params.chain_name), {apiKey: TON_CENTER_API_KEY});
-        let tonWebCollection = new NftCollection(tonWebProvider, createCollectionParams);
-        const nftCollectionAddress = await tonWebCollection.getAddress()
         const stateInit = await tonWebCollection.createStateInit();
         const stateInitBoc = await stateInit.stateInit.toBoc(false);
         const stateInitBase64 = TonWeb.utils.bytesToBase64(stateInitBoc);
         return {
             value: "0.1",
-            to: nftCollectionAddress.toString(true, true),
+            to: nftCollectionAddress,
             state_init: stateInitBase64
         }
     }
@@ -263,6 +266,32 @@ class NFTService extends Service {
             description: res.description,
             attributes: JSON.parse(res.attrs)
         }
+    }
+
+    async queryCreatedCollection(chainName, creator) {
+        const total = await this.app.mysql.get('app').query(
+            "select count(*) as count from ton_collection_metadata where creator=? and is_mainnet=?",
+            [chainName === CHAIN_NAME_TON_MAINNET, creator]);
+        if (!total) {
+            return {total: 0, data: []};
+        }
+        const res = await this.app.mysql.get('app').select('ton_collection_metadata', {
+            where: {
+                is_mainnet: chainName === CHAIN_NAME_TON_MAINNET,
+                creator: creator
+            },
+        });
+        if (!res) {
+            return {total: 0, data: []};
+        }
+        const data = [];
+        for (const item of res) {
+            data.push({
+                name: item.name,
+                addr: item.addr,
+            })
+        }
+        return {total: total[0].count, data: data};
     }
 }
 
