@@ -172,12 +172,12 @@ class NFTService extends Service {
         let tonWebCollection = new NftCollection(tonWebProvider, createCollectionParams);
         const nftCollectionAddress = await tonWebCollection.getAddress()
         const stateInit = await tonWebCollection.createStateInit();
+        const stateInitBoc = await stateInit.stateInit.toBoc(false);
+        const stateInitBase64 = TonWeb.utils.bytesToBase64(stateInitBoc);
         return {
             value: "0.1",
             to: nftCollectionAddress.toString(true, true),
-            state_init: beginCell().storeRef(Cell.fromBoc(Buffer.from(await stateInit.code.toBoc()))[0])
-                .storeRef(Cell.fromBoc(Buffer.from(await stateInit.data.toBoc()))[0])
-                .endCell().toBoc().toString('base64')
+            state_init: stateInitBase64
         }
     }
 
