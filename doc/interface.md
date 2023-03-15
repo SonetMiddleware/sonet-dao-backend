@@ -806,7 +806,7 @@ item URI: /assets/ton-collection/:chain_name/:collection_name/:token_id
 
 Method: GET
 
-URL: /api/v1/collection/created-by?chain_name=xxx&creator=xxx
+URL: /api/v1/collection/created-by?chain_name=xxx&creator=xxx&page=xxx&gap=xxx
 
 Response:
 

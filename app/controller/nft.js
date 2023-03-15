@@ -118,7 +118,8 @@ class NFTController extends Controller {
         ctx.validate({
             creator: 'address'
         }, param);
-        ctx.body = await ctx.service.nftService.queryCreatedCollection(param.chain_name, param.creator);
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        ctx.body = await ctx.service.nftService.queryCreatedCollection(param.chain_name, param.creator, limit, offset);
     }
 
     async uploadFileToIPFS() {
