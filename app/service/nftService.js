@@ -271,7 +271,7 @@ class NFTService extends Service {
     async queryCreatedCollection(chainName, creator) {
         const total = await this.app.mysql.get('app').query(
             "select count(*) as count from ton_collection_metadata where creator=? and is_mainnet=?",
-            [chainName === CHAIN_NAME_TON_MAINNET, creator]);
+            [creator, chainName === CHAIN_NAME_TON_MAINNET]);
         if (!total) {
             return {total: 0, data: []};
         }
@@ -289,6 +289,8 @@ class NFTService extends Service {
             data.push({
                 name: item.name,
                 addr: item.addr,
+                image: item.image,
+                cover_image: item.cover_image,
             })
         }
         return {total: total[0].count, data: data};
