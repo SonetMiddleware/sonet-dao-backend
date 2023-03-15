@@ -29,7 +29,7 @@ class DAOService extends Service {
         try {
             // upload image to ipfs
             try {
-                params.collection_image = await uploadFileToIPFS(params.collection_image);
+                param.collection_image = await uploadFileToIPFS(param.collection_image);
             } catch (e) {
                 this.app.logger.error("createTGDao: upload image failed, ", e);
             }
