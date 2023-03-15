@@ -3,6 +3,8 @@ module.exports = app => {
     router.get('/', controller.index.index);
     router.get('/api/v1', controller.index.index);
 
+    router.post('/api/v1/nft/upload-img', controller.nft.uploadFileToIPFS);
+
     router.post('/api/v1/bind-addr', controller.socialMedia.bindAddr);
     router.post('/api/v1/referral/gen', controller.socialMedia.generateReferralCode);
     router.post('/api/v1/referral/accept', controller.socialMedia.acceptReferral);

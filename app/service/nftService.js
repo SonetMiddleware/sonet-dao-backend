@@ -8,7 +8,6 @@ const {Address, beginCell, Cell} = require("ton-core");
 const {SmartContract} = require("ton-contract-executor");
 const {TonClient} = require("ton");
 const BN = require("bn.js");
-const {uploadFileToIPFS} = require("../utils/ipfs");
 
 class NFTService extends Service {
 
@@ -164,14 +163,6 @@ class NFTService extends Service {
             }
         });
         if (existed === undefined || existed.length === 0) {
-            // upload image to ipfs
-            try {
-                params.metadata.image = await uploadFileToIPFS(params.metadata.image);
-                params.metadata.cover_image = await uploadFileToIPFS(params.metadata.cover_image);
-            } catch (e) {
-                this.app.logger.error("genTONCollectionDeployTx: upload image failed, ", e);
-            }
-
             await this.app.mysql.get('app').insert('ton_collection_metadata', {
                 is_mainnet: params.chain_name === CHAIN_NAME_TON_MAINNET,
                 name: params.metadata.name,
@@ -227,12 +218,6 @@ class NFTService extends Service {
             }
         });
         if (existed === undefined || existed.length === 0) {
-            // upload image to ipfs
-            try {
-                params.metadata.image = await uploadFileToIPFS(params.metadata.image);
-            } catch (e) {
-                this.app.logger.error("genTONNFTItemMintTx: upload image failed, ", e);
-            }
             await this.app.mysql.get('app').insert('ton_collection_item_metadata', {
                 is_mainnet: params.chain_name === CHAIN_NAME_TON_MAINNET,
                 collection_name: params.collection.name,

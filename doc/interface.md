@@ -1410,3 +1410,29 @@ Return:
   }
 }
 ```
+
+## IPFS
+
+### Upload Image
+
+Method: POST
+
+URL: /api/v1/nft/upload-img
+
+params: upload img throw form-data
+
+> note: upload at most 9 img at same time
+
+Return:
+
+```json
+{
+  "code": 0,
+  "error": "",
+  "data": [
+    "ipfs://QmYd8U86TXwwSCL855D5USUqrSRzEDcbMQZqUXwhnMJURw",
+    "ipfs://QmUkEQKPDH4tfFN69bHhimAi1RzYFENWSBsmRg6zdmboHy",
+    "ipfs://QmZeb1WShrL7YnWBs4yXnR4TG5hB7DUpj2qqhkCkiBJdTj"
+  ]
+}
+```

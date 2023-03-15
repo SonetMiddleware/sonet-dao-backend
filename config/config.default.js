@@ -7,6 +7,10 @@ exports.security = {
     },
 };
 
+exports.multipart = {
+    mode: 'file',
+};
+
 exports.cors = {
     origin: '*',
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'

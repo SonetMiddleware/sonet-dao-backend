@@ -6,6 +6,12 @@ const constant = require('../utils/constant');
 const utils = require("../utils/utils");
 const {isFlowContract, isFlowAddr} = require("../utils/utils");
 const {sha256} = require("js-sha256");
+const {uploadStreamToIPFS} = require("../utils/ipfs");
+const {v4: uuidv4} = require('uuid');
+const path = require('path');
+const fs = require('fs');
+const {pipeline} = require('stream/promises');
+const {RESP_CODE_ILLEGAL_PARAM} = require("../utils/constant");
 
 class NFTController extends Controller {
     async queryNFTById() {
@@ -115,6 +121,41 @@ class NFTController extends Controller {
         ctx.body = await ctx.service.nftService.queryCreatedCollection(param.chain_name, param.creator);
     }
 
+    async uploadFileToIPFS() {
+        const {ctx} = this;
+        const files = ctx.request.files;
+        if (!files || files.length > 9) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, 'too many files', {})
+            return
+        }
+        const res = [];
+        const uuid = uuidv4();
+        const dir = path.join(this.config.baseDir, `app/public/${uuid}`);
+        fs.mkdirSync(dir);
+        try {
+            let index = 1;
+            for (const file of files) {
+                const filename = index + file.filename;
+                index++
+                const targetPath = path.join(dir, index + filename);
+                const source = fs.createReadStream(file.filepath);
+                const target = fs.createWriteStream(targetPath);
+                await pipeline(source, target);
+            }
+            let ipfsFiles = await uploadStreamToIPFS(dir);
+            for await (const file of ipfsFiles) {
+                res.push('ipfs://' + file.cid.toString());
+            }
+            ctx.body = data.newNormalResp(res)
+        } catch (e) {
+            ctx.body = data.newResp(constant.RESP_CODE_NORMAL_ERROR, e.toString())
+        } finally {
+            // delete those request tmp files
+            await ctx.cleanupRequestFiles();
+            fs.rmdirSync(dir, {recursive: true});
+        }
+    }
+
     async genTONCollectionDeployTx() {
         const {ctx} = this;
         let param = ctx.request.body;
@@ -146,11 +187,11 @@ class NFTController extends Controller {
         ctx.validate({
             addr: 'address'
         }, param.collection);
-        // try {
-        ctx.body = data.newNormalResp(await ctx.service.nftService.genTONNFTItemMintTx(param));
-        // } catch (e) {
-        //     ctx.body = data.newResp(constant.RESP_CODE_NORMAL_ERROR, e.toString())
-        // }
+        try {
+            ctx.body = data.newNormalResp(await ctx.service.nftService.genTONNFTItemMintTx(param));
+        } catch (e) {
+            ctx.body = data.newResp(constant.RESP_CODE_NORMAL_ERROR, e.toString())
+        }
     }
 }
 
