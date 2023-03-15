@@ -16,6 +16,7 @@ const {
     getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT
 } = require("../utils/utils");
 const {sha256} = require("js-sha256");
+const {uploadFileToIPFS} = require("../utils/ipfs");
 
 class DAOService extends Service {
 
@@ -26,6 +27,12 @@ class DAOService extends Service {
         const mysql = await this.app.mysql.get('chainData');
         const conn = await mysql.beginTransaction();
         try {
+            // upload image to ipfs
+            try {
+                params.collection_image = await uploadFileToIPFS(params.collection_image);
+            } catch (e) {
+                this.app.logger.error("createTGDao: upload image failed, ", e);
+            }
             await conn.insert('collection_map', {
                 collection_id: param.collection_id,
                 contract: param.contract,
@@ -179,7 +186,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                         into nft_reg
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -201,7 +208,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                         into nft_reg
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -559,11 +566,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count(*) as proposal_num
-                                                from ${appDataDBName}.proposal
-                                                group by collection_id) p
-                    on c.collection_id = p.collection_id
-                 set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count (*) as proposal_num
+                     from ${appDataDBName}.proposal
+                     group by collection_id) p
+                 on c.collection_id = p.collection_id
+                     set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);
