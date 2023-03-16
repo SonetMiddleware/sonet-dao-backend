@@ -9,8 +9,10 @@ const fcl = require("@onflow/fcl");
 const {config} = require("@onflow/fcl");
 const flowCatalog = require("flow-catalog");
 const flowCADUT = require("@onflow/flow-cadut");
-const {Address, beginCell} = require("ton-core");
-const {WalletContractV4, WalletContractV3R2, safeSignVerify} = require("ton");
+const {Address, beginCell, Cell, contractAddress, toNano} = require("ton-core");
+const {WalletContractV4, WalletContractV3R2, safeSignVerify, TonClient} = require("ton");
+const {mnemonicToPrivateKey} = require("ton-crypto");
+const fs = require("fs");
 
 function parsePageParamToDBParam(page, gap) {
     if (!page) {
@@ -420,6 +422,46 @@ async function getTONNFTs(chainName, owner, collectionAddr, limit, offset) {
     };
 }
 
+async function createDaoAtTon(owner, collectionId, collectionName, tg, twitter) {
+    let client = new TonClient({
+        endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC', apiKey: env.TON_CENTER_API,
+    })
+    let key = await mnemonicToPrivateKey(env.TON_MNEMONIC.split(" "));
+    let wallet = await WalletContractV3R2.create({workchain: 0, publicKey: key.publicKey})
+    let walletContract = await client.open(wallet);
+    const daoCode = fs.readFileSync("./app/public/dao-data.cell");
+    let codeCell = Cell.fromBoc(daoCode)[0];
+    let dataCell = beginCell()
+        .storeAddress(Address.parse(owner))
+        .storeRef(beginCell().storeBuffer(Buffer.from(collectionId)))
+        .storeRef(beginCell().storeBuffer(Buffer.from(collectionName)))
+        .storeRef(beginCell().storeBuffer(Buffer.from(tg)))
+        .storeRef(beginCell().storeBuffer(Buffer.from(twitter)))
+        .endCell()
+    let address = contractAddress(0, {code: codeCell, data: dataCell})
+
+    await walletContract.sendTransfer({
+        seqno: await walletContract.getSeqno(),
+        secretKey: key.secretKey,
+        messages: [{
+            info: {
+                type: 'internal',
+                ihrDisabled: false,
+                bounce: false,
+                bounced: false,
+                dest: address,
+                value: {coins: toNano("0.05")},
+                ihrFee: toNano(0),
+                forwardFee: toNano(0),
+                createdLt: toNano(0),
+                createdAt: 0
+            },
+            init: {code: codeCell, data: dataCell},
+            body: new Cell()
+        }]
+    });
+    return address.toString();
+}
 function limitAndOffsetArray(nfts, limit, offset) {
     if (!limit || !offset) {
         return nfts;
@@ -512,5 +554,5 @@ module.exports = {
     verifyFlowSig,
 
     getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT,
-    isTONAddr, isTONNetwork, verifyTonSig, verifyTGRobot, createTONNFTItemMintBody
+    isTONAddr, isTONNetwork, verifyTonSig, verifyTGRobot, createTONNFTItemMintBody,createDaoAtTon
 }

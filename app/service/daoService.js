@@ -9,11 +9,11 @@ const {
     VOTER_TYPE_PER_ADDR,
     VOTER_TYPE_PER_NFT,
     VOTER_TYPE_OTHER_TOKEN,
-    VOTER_TYPE_TONCOIN
+    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET
 } = require("../utils/constant");
 const {
     getFlowNFTs, isFlowNetwork, getFlowNFTIdsOfAccount, getNFTKinds, isTONNetwork,
-    getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT
+    getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT, createDaoAtTon
 } = require("../utils/utils");
 const {sha256} = require("js-sha256");
 const {uploadFileToIPFS} = require("../utils/ipfs");
@@ -23,6 +23,17 @@ class DAOService extends Service {
     async createTGDao(param) {
         if (!await tonUserOwnedCollectionNFT(param.chain_name, param.creator, param.contract)) {
             throw new Error("ill creator");
+        }
+        // create dao
+        if (param.chain_name === CHAIN_NAME_TON_TESTNET) {
+            try {
+                // use collection name as tg name
+                const daoAddr = await createDaoAtTon(param.creator, param.collection_id, param.collection_name,
+                    param.collection_name, param.twitter);
+                this.app.logger.info("createTGDao:", daoAddr);
+            } catch (e) {
+                this.app.logger.error("createTGDao: createDaoAtTon, ", e);
+            }
         }
         const mysql = await this.app.mysql.get('chainData');
         const conn = await mysql.beginTransaction();
@@ -186,7 +197,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                    into nft_reg
+                         into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -208,7 +219,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                    into nft_reg
+                         into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -566,11 +577,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count (*) as proposal_num
-                     from ${appDataDBName}.proposal
-                     group by collection_id) p
-                 on c.collection_id = p.collection_id
-                     set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count(*) as proposal_num
+                                                from ${appDataDBName}.proposal
+                                                group by collection_id) p
+                    on c.collection_id = p.collection_id
+                 set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);
