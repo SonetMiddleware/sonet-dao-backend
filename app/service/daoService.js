@@ -30,7 +30,7 @@ class DAOService extends Service {
                 // use collection name as tg name
                 const daoAddr = await createDaoAtTon(param.creator, param.collection_id, param.collection_name,
                     param.collection_name, param.twitter);
-                this.app.logger.info("createTGDao:", daoAddr);
+                this.app.logger.info("createTGDao: user %s, dao name %s, addr %s", param.creator, param.collection_name, daoAddr);
             } catch (e) {
                 this.app.logger.error("createTGDao: createDaoAtTon, ", e);
             }
