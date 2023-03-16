@@ -35,6 +35,8 @@ TON cannot sign offline, so header authentication is used:
 
 * Add the `authorization: "TG Robot"` field to the header
 
+> bind and unbind address required user's signature
+
 ## Response Format
 
 The response format is standardized as follows:
@@ -74,6 +76,7 @@ Params:
 ```json
 {
   "addr": "",
+  "pubkey": "hex encoded public key, required only for TON",
   "tid": "",
   "platform": "",
   "chain_name": "",
@@ -85,6 +88,8 @@ Params:
 > method. The `platform` should be one of {Twitter, Facebook, Instagram, Telegram}, and it is case-sensitive.
 >
 > Note: If `chain_name` is not passed, it will default to `mainnet`.
+> 
+> note: ton sig payload should be platform+tid, text should be 'please sign message'
 
 Return:
 
@@ -143,6 +148,7 @@ Parameters:
 ```json
 {
   "addr": "",
+  "pubkey": "hex encoded public key, required only for TON",
   "tid": "",
   "platform": "",
   "chain_name": "",
@@ -166,6 +172,8 @@ Return:
 > in [example.js](./example.js).
 >
 > Note: If `chain_name` is not passed, it defaults to mainnet.
+>
+> note: ton sig payload should be platform+tid, text should be 'please sign message'
 
 ### Query Binding Relationship
 

@@ -10,6 +10,7 @@ const {config} = require("@onflow/fcl");
 const flowCatalog = require("flow-catalog");
 const flowCADUT = require("@onflow/flow-cadut");
 const {Address, beginCell} = require("ton-core");
+const {WalletContractV4, WalletContractV3R2, safeSignVerify} = require("ton");
 
 function parsePageParamToDBParam(page, gap) {
     if (!page) {
@@ -459,13 +460,25 @@ function isTONNetwork(chainName) {
     return chainName === CHAIN_NAME_TON_TESTNET || chainName === CHAIN_NAME_TON_MAINNET;
 }
 
-async function verifyTonSig(chainName, addr, msg, rawSignature) {
-    // TODO: verify signature
-    return true;
+function verifyTonSig(addr, msg, rawSignature, publicKey) {
+    let walletV4 = WalletContractV4.create({workchain: 0, publicKey: publicKey, walletId: 698983191});
+    let walletV3R2 = WalletContractV3R2.create({workchain: 0, publicKey: publicKey, walletId: 698983191});
+    let payloadCell = beginCell().storeBuffer(Buffer.concat([
+        Buffer.from([0, 0, 0, 0]),
+        Buffer.from(msg),
+    ])).endCell();
+    console.log(payloadCell.toBoc({hasIdx: false}).toString('base64'));
+    let textCell = beginCell().storeUint(0, 32).storeStringTail("Please sign message").endCell();
+    let data = beginCell().storeRef(textCell)
+        .storeRef(payloadCell).endCell();
+    const signed = safeSignVerify(data, Buffer.from(rawSignature, 'base64'), publicKey);
+    console.log('signed', signed);
+    let parsedAddr = Address.parse(addr);
+    return signed && (walletV4.address.equals(parsedAddr) || walletV3R2.address.equals(parsedAddr));
 }
 
 function verifyTGRobot(req) {
-    return req.headers.authorization === "TG Robot"
+    return req.headers.authorization === env.TG_ROBOT_HEADER
 }
 
 function createTONNFTItemMintBody(params) {

@@ -29,6 +29,8 @@ class SocialMediaController extends Controller {
             valid = await verifyFlowSig(param.chain_name, param.addr, message, param.sig);
         } else if (isTONNetwork(param.chain_name)) {
             valid = verifyTGRobot(ctx.request);
+            let sigValid = utils.verifyTonSig(param.addr, message, param.sig, Buffer.from(param.pubkey, 'hex'));
+            valid = valid && sigValid;
         } else {
             let signer = web3.eth.accounts.recover(message, param.sig);
             valid = signer === param.addr;
@@ -88,6 +90,8 @@ class SocialMediaController extends Controller {
             valid = await verifyFlowSig(param.chain_name, param.addr, message, param.sig);
         } else if (isTONNetwork(param.chain_name)) {
             valid = verifyTGRobot(ctx.request);
+            let sigValid = utils.verifyTonSig(param.addr, message, param.sig, Buffer.from(param.pubkey, 'hex'));
+            valid = valid && sigValid;
         } else {
             let signer = web3.eth.accounts.recover(message, param.sig);
             valid = signer === param.addr;
