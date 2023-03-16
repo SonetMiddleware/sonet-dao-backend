@@ -33,10 +33,14 @@ verifyTonSig().then(() => process.exit(0)).catch(e => console.log(e));
 
 const addr = 'kQCkeUfuGycIp6EJN3LdqhdlOd7aNdLEqxk5LnQYij1Q6EHZ';
 const msg = 'Telegram1842871751';
-const signature = '3f8T2rkS3X+qoMajJMJ9Yc/f/Ex/xXp7A19ShbkH3Sy6k7qP9glA4W4v+9lHNvVRNwi9IJIYKFxLKg328Gs6AA==';
 const pubkey = Buffer.from('dc18e74b21d9beb632ef4ba671db00f522da9716ddde223775a5b160f7baba72', 'hex');
 let walletV4 = WalletContractV4.create({workchain: 0, publicKey: pubkey});
 let walletV3R2 = WalletContractV3R2.create({workchain: 0, publicKey: pubkey});
 console.log(walletV4.address.equals(Address.parse(addr)));
 console.log(walletV3R2.address.equals(Address.parse(addr)));
-console.log(utils.verifyTonSig(addr, msg, signature, pubkey))
+let text = 'Bind your address with Telegram';
+let signature = 'lcdLfMbaMK99d43efOxr8sAoW0BdcSQzFzPT9V+3iPpk7wSpTZBJ8+ZnHiFT6zWCuwj/xI3I/uxz0fI+lgR8Dg==';
+console.log(utils.verifyTonSig(addr, text, msg, signature, pubkey))
+text = 'Unbind your address with Telegram';
+signature = 'BsMx6tIu/I5AzZ7v6rLWIs4oFwzl0o2Q06dx2PjqIWZGQqFX94znB+Hc4mnx7dUyzoXrVkytH+HU7djy9MZ3AQ==';
+console.log(utils.verifyTonSig(addr, text, msg, signature, pubkey))

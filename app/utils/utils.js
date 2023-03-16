@@ -460,14 +460,14 @@ function isTONNetwork(chainName) {
     return chainName === CHAIN_NAME_TON_TESTNET || chainName === CHAIN_NAME_TON_MAINNET;
 }
 
-function verifyTonSig(addr, msg, rawSignature, publicKey) {
+function verifyTonSig(addr, text, payload, rawSignature, publicKey) {
     let walletV4 = WalletContractV4.create({workchain: 0, publicKey: publicKey});
     let walletV3R2 = WalletContractV3R2.create({workchain: 0, publicKey: publicKey});
     let payloadCell = beginCell().storeBuffer(Buffer.concat([
         Buffer.from([0, 0, 0, 0]),
-        Buffer.from(msg),
+        Buffer.from(payload),
     ])).endCell();
-    let textCell = beginCell().storeUint(0, 32).storeStringTail("Please sign message").endCell();
+    let textCell = beginCell().storeUint(0, 32).storeStringTail(text).endCell();
     let data = beginCell().storeRef(textCell)
         .storeRef(payloadCell).endCell();
     const signed = safeSignVerify(data, Buffer.from(rawSignature, 'base64'), publicKey);
