@@ -829,7 +829,8 @@ Response:
         "name": "So Cat Test",
         "addr": "EQCkeUfuGycIp6EJN3LdqhdlOd7aNdLEqxk5LnQYij1Q6PpT",
         "image": "image url",
-        "cover_image": "cover image url"
+        "cover_image": "cover image url",
+        "deployed": false
       }
     ]
   }

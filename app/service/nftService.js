@@ -1,4 +1,4 @@
-const {getFlowNFTs, isFlowNetwork, createTONNFTItemMintBody} = require("../utils/utils");
+const {getFlowNFTs, isFlowNetwork, createTONNFTItemMintBody, isCollectionDeployed} = require("../utils/utils");
 const Service = require('egg').Service;
 const {sha256} = require('js-sha256');
 const {CHAIN_NAME_TON_MAINNET, getNodeUrl, TON_CENTER_API_KEY} = require("../utils/constant");
@@ -287,13 +287,29 @@ class NFTService extends Service {
             return {total: 0, data: []};
         }
         const data = [];
+        const deployedName = []
         for (const item of res) {
+            if (!item.deployed) {
+                item.deployed = await isCollectionDeployed(item.addr);
+                if (item.deployed) {
+                    deployedName.push(item.name);
+                }
+            }
             data.push({
                 name: item.name,
                 addr: item.addr,
                 image: item.image,
                 cover_image: item.cover_image,
+                deployed: item.deployed,
             })
+        }
+        if (deployedName.length > 0) {
+            await this.app.mysql.get('app').update('ton_collection_metadata', {deployed: true}, {
+                where: {
+                    is_mainnet: chainName === CHAIN_NAME_TON_MAINNET,
+                    name: deployedName,
+                }
+            });
         }
         return {total: total[0].count, data: data};
     }

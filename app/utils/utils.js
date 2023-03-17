@@ -462,6 +462,7 @@ async function createDaoAtTon(owner, collectionId, collectionName, tg, twitter) 
     });
     return address.toString();
 }
+
 function limitAndOffsetArray(nfts, limit, offset) {
     if (!limit || !offset) {
         return nfts;
@@ -537,6 +538,17 @@ function createTONNFTItemMintBody(params) {
         ).endCell().toBoc().toString("base64");
 }
 
+async function isCollectionDeployed(addr) {
+    let client = new TonClient({
+        endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC', apiKey: env.TON_CENTER_API,
+    })
+    let address = Address.parse(addr);
+    let res = await client.getContractState(address)
+    let ownCode = res.code && res.code.length > 0;
+    let ownData = res.data && res.data.length > 0;
+    return res.state === 'active' && ownCode && ownData;
+}
+
 module.exports = {
     parsePageParamToDBParam,
 
@@ -554,5 +566,5 @@ module.exports = {
     verifyFlowSig,
 
     getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT,
-    isTONAddr, isTONNetwork, verifyTonSig, verifyTGRobot, createTONNFTItemMintBody,createDaoAtTon
+    isTONAddr, isTONNetwork, verifyTonSig, verifyTGRobot, createTONNFTItemMintBody, createDaoAtTon, isCollectionDeployed
 }
