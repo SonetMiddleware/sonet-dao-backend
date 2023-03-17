@@ -27,10 +27,9 @@ class DAOService extends Service {
         // create dao
         if (param.chain_name === CHAIN_NAME_TON_TESTNET) {
             try {
-                // use collection name as tg name
                 const daoAddr = await createDaoAtTon(param.creator, param.collection_id, param.collection_name,
-                    param.collection_name, param.twitter);
-                this.app.logger.info("createTGDao: user %s, dao name %s, addr %s", param.creator, param.collection_name, daoAddr);
+                    param.dao_name, param.twitter);
+                this.app.logger.info("createTGDao: user: %s, dao: %s, dao contract: %s", param.creator, param.collection_name, daoAddr);
             } catch (e) {
                 this.app.logger.error("createTGDao: createDaoAtTon, ", e);
             }
