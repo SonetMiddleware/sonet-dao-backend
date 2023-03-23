@@ -2,7 +2,7 @@ const env = require("../../config/env.json");
 const request = require('request');
 const {
     ERC721, CHAIN_NAME_FLOW_MAINNET, CHAIN_NAME_FLOW_TESTNET, getExplorer, CHAIN_NAME_TON_MAINNET,
-    CHAIN_NAME_TON_TESTNET
+    CHAIN_NAME_TON_TESTNET, getNodeUrl
 } = require("./constant");
 const Web3 = require("web3");
 const fcl = require("@onflow/fcl");
@@ -422,9 +422,10 @@ async function getTONNFTs(chainName, owner, collectionAddr, limit, offset) {
     };
 }
 
-async function createDaoAtTon(owner, collectionId, collectionName, tg, twitter) {
+async function createDaoAtTon(chainName, owner, collectionId, collectionName, tg, twitter) {
     let client = new TonClient({
-        endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC', apiKey: env.TON_CENTER_API,
+        endpoint: getNodeUrl(chainName),
+        apiKey: chainName === CHAIN_NAME_TON_TESTNET ? env.TON_CENTER_API : env.TON_CENTER_API_PROD,
     })
     let key = await mnemonicToPrivateKey(env.TON_MNEMONIC.split(" "));
     let wallet = await WalletContractV3R2.create({workchain: 0, publicKey: key.publicKey})
@@ -538,9 +539,10 @@ function createTONNFTItemMintBody(params) {
         ).endCell().toBoc().toString("base64");
 }
 
-async function isCollectionDeployed(addr) {
+async function isCollectionDeployed(chainName, addr) {
     let client = new TonClient({
-        endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC', apiKey: env.TON_CENTER_API,
+        endpoint: getNodeUrl(chainName),
+        apiKey: chainName === CHAIN_NAME_TON_TESTNET ? env.TON_CENTER_API : env.TON_CENTER_API_PROD,
     })
     let address = Address.parse(addr);
     let res = await client.getContractState(address)

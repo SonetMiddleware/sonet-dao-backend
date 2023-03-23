@@ -290,7 +290,7 @@ class NFTService extends Service {
         const deployedName = []
         for (const item of res) {
             if (!item.deployed) {
-                item.deployed = await isCollectionDeployed(item.addr);
+                item.deployed = await isCollectionDeployed(chainName, item.addr);
                 if (item.deployed) {
                     deployedName.push(item.name);
                 }
