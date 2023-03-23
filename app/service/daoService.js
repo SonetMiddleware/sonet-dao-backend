@@ -22,7 +22,7 @@ class DAOService extends Service {
 
     async createTGDao(param) {
         if (!await tonUserOwnedCollectionNFT(param.chain_name, param.creator, param.contract)) {
-            throw new Error("ill creator");
+            throw new Error("creator doesn't own NFT");
         }
         // create dao
         if (param.chain_name === CHAIN_NAME_TON_TESTNET) {
