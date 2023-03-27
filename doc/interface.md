@@ -88,7 +88,7 @@ Params:
 > method. The `platform` should be one of {Twitter, Facebook, Instagram, Telegram}, and it is case-sensitive.
 >
 > Note: If `chain_name` is not passed, it will default to `mainnet`.
-> 
+>
 > note: ton sig payload should be platform+tid, text should be 'please sign message'
 
 Return:
@@ -846,7 +846,7 @@ owned by the user.
 
 Method: GET
 
-URL: /api/v1/collection-list?chain_name=xxx&addr=xxx&page=xxx&gap=xxx
+URL: /api/v1/collection-list?chain_name=xxx&collection_name=xxx&addr=xxx&page=xxx&gap=xxx
 
 > Note: addr and chain_name parameters are required.
 

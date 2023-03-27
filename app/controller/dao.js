@@ -31,8 +31,8 @@ class DAOController extends Controller {
             chain_name: 'chainName'
         }, param);
         const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
-        ctx.body = data.newNormalResp(await ctx.service.daoService.queryCollectionList(param.chain_name, param.addr,
-            limit, offset));
+        ctx.body = data.newNormalResp(await ctx.service.daoService.queryCollectionList(param.chain_name,
+            param.collection_name, param.addr, limit, offset));
     }
 
     async queryCollection() {

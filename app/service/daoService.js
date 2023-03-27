@@ -72,7 +72,7 @@ class DAOService extends Service {
         }
     }
 
-    async queryCollectionList(chainName, addr, limit, offset) {
+    async queryCollectionList(chainName, collectionName, addr, limit, offset) {
         const mysql = this.app.mysql.get('chainData');
         let total, result;
         if (isFlowNetwork(chainName) || isTONNetwork(chainName)) {
@@ -80,35 +80,43 @@ class DAOService extends Service {
             if (collectionIds.length === 0) {
                 return {total: 0, data: []}
             }
-            let data = await mysql.select('collection', {
-                where: {
-                    chain_name: chainName,
-                    collection_id: collectionIds,
-                }
-            });
-            total = data.length;
-            if (offset + limit < data.length) {
-                result = data.slice(offset);
-            } else {
-                result = data.slice(offset, offset + limit);
+            let sql = `from collection
+                       where chain_name = ?
+                         and collection_id in (?) `;
+            if (collectionName) {
+                sql += `and collection_name like '%${collectionName}%'`;
             }
+            let totalRes = await mysql.query('select count(*) as total ' + sql, [chainName, collectionIds]);
+            total = totalRes[0].total;
+            if (offset && limit) {
+                sql += ' limit ' + offset + ', ' + limit
+            } else if (limit) {
+                sql += ' limit ' + limit;
+            }
+            result = await mysql.query('select *' + sql, [chainName, collectionIds]);
         } else {
-            total = await mysql.query(
-                `select count(*)
-                 from collection
-                 where collection.collection_id in (select collection_id
-                                                    from collection_map
-                                                    where contract in
-                                                          (select distinct contract from nft_${chainName} where owner = ?))`,
-                addr);
-            total = total[0]['count(*)'];
-            //
-            let sql = `select *
+            let sql = `select count(*)
                        from collection
-                       where collection.collection_id in (select collection_id
-                                                          from collection_map
-                                                          where contract in
-                                                                (select distinct contract from nft_${chainName} where owner = ?))`
+                       where collection.collection_id
+                                 in (select collection_id
+                                     from collection_map
+                                     where contract in
+                                           (select distinct contract from nft_${chainName} where owner = ?))`;
+            if (collectionName) {
+                sql += `and collection_name like '%${collectionName}%'`;
+            }
+            total = await mysql.query(sql, addr);
+
+            total = total[0]['count(*)'];
+            sql = `select *
+                   from collection
+                   where collection.collection_id in (select collection_id
+                                                      from collection_map
+                                                      where contract in
+                                                            (select distinct contract from nft_${chainName} where owner = ?))`
+            if (collectionName) {
+                sql += `and collection_name like '%${collectionName}%'`;
+            }
             if (offset && limit) {
                 sql += ' limit ' + offset + ', ' + limit
             } else if (limit) {
@@ -196,7 +204,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                         into nft_reg
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -218,7 +226,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                         into nft_reg
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -576,11 +584,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count(*) as proposal_num
-                                                from ${appDataDBName}.proposal
-                                                group by collection_id) p
-                    on c.collection_id = p.collection_id
-                 set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count (*) as proposal_num
+                     from ${appDataDBName}.proposal
+                     group by collection_id) p
+                 on c.collection_id = p.collection_id
+                     set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);
