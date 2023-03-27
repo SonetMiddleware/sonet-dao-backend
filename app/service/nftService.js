@@ -268,21 +268,23 @@ class NFTService extends Service {
         }
     }
 
-    async queryCreatedCollection(chainName, creator, limit, offset) {
-        const total = await this.app.mysql.get('app').query(
-            "select count(*) as count from ton_collection_metadata where creator=? and is_mainnet=?",
+    async queryCreatedCollection(chainName, name, creator, limit, offset) {
+        let sql = 'from ton_collection_metadata where creator=? and is_mainnet=? ';
+        if (name) {
+            sql += `and name like '%${name}%'`;
+        }
+        const total = await this.app.mysql.get('app').query("select count(*) as count " + sql,
             [creator, chainName === CHAIN_NAME_TON_MAINNET]);
-        if (!total) {
+        if (!total || total[0].count === 0) {
             return {total: 0, data: []};
         }
-        const res = await this.app.mysql.get('app').select('ton_collection_metadata', {
-            where: {
-                is_mainnet: chainName === CHAIN_NAME_TON_MAINNET,
-                creator: creator
-            },
-            limit: limit,
-            offset: offset,
-        });
+        if (offset && limit) {
+            sql += ' limit ' + offset + ', ' + limit
+        } else if (limit) {
+            sql += ' limit ' + limit;
+        }
+        const res = await this.app.mysql.get('app').query("select * " + sql,
+            [creator, chainName === CHAIN_NAME_TON_MAINNET]);
         if (!res) {
             return {total: 0, data: []};
         }
