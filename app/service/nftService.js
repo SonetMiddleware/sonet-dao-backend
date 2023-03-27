@@ -213,7 +213,7 @@ class NFTService extends Service {
         let existed = await this.app.mysql.get('app').select('ton_collection_item_metadata', {
             where: {
                 is_mainnet: params.chain_name === CHAIN_NAME_TON_MAINNET,
-                name: params.metadata.name,
+                token_id: `${index.toNumber()}`,
                 collection_name: params.collection.name
             }
         });
