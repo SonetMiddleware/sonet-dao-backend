@@ -229,6 +229,8 @@ class NFTService extends Service {
                 name: params.metadata.name,
                 image: params.metadata.image,
                 description: params.metadata.description,
+                content_type: params.metadata.content_type,
+                content_url: params.metadata.content_url,
                 attrs: JSON.stringify(params.metadata.attributes)
             });
         }
@@ -268,6 +270,8 @@ class NFTService extends Service {
             name: res.name,
             image: res.image,
             description: res.description,
+            content_type: res.content_type,
+            content_url: res.content_url,
             attributes: JSON.parse(res.attrs)
         }
     }

@@ -766,6 +766,8 @@ params:
     "name": "collection name",
     "image": "image url",
     "description": "collection description",
+    "content_type": "",
+    "content_url": "",
     "attributes": [
       {
         "trait_type": "Material",
