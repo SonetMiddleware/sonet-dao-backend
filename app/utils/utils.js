@@ -525,7 +525,6 @@ function verifyTGRobot(req) {
 
 function createTONNFTItemMintBody(params) {
     let uri = Buffer.from(new TextEncoder().encode(encodeURI(params.itemContentUri)));
-    console.log(uri.toString());
     return beginCell().storeUint(1, 32)
         .storeUint(params.queryId || 0, 64)
         .storeUint(params.itemIndex, 64)

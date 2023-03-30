@@ -709,6 +709,7 @@ params:
 ```json
 {
   "chain_name": "TONtest",
+  "enable_other_mint": true,
   "owner": "ownerAddr",
   "royalty": 0.1,
   "royalty_address": "royaltyAddress",
