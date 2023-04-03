@@ -357,7 +357,7 @@ Returns:
 {
   "code": "",
   "error": "",
-  "data": ""
+  "data": true
 }
 ```
 
