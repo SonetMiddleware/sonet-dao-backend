@@ -361,11 +361,11 @@ Returns:
 }
 ```
 
-### Query Telegram Message Status
+### Query Telegram Group Message Status
 
 method: get
 
-URL: /api/v1/tg/message?group_id=xxx&order_by=xxx&page=xxx&gap=xxx
+URL: /api/v1/tg/message/:group_id?order_by=xxx&page=xxx&gap=xxx
 
 > order by `like | unlike | follow`, if not defined, order by `like`
 
@@ -388,6 +388,30 @@ returns:
       }
     ]
   }
+}
+```
+
+### Query Telegram Message Status
+
+method: get
+
+URL: /api/v1/tg/message/:group_id/:message_id
+
+returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": [
+    {
+      "nft_contract": "",
+      "nft_token_id": "",
+      "like": 10,
+      "unlike": 19,
+      "follow": 1
+    }
+  ]
 }
 ```
 

@@ -45,7 +45,8 @@ module.exports = app => {
     router.get('/api/v1/twitter-nft/counts', controller.socialMedia.getNFTTwitterCounts);
     router.get('/api/v1/twitter-nft/snapshots', controller.socialMedia.getNFTTwitterSnapshot);
     router.get('/api/v1/twitter-nft', controller.socialMedia.getTwitterNFT);
-    router.get('/api/v1/tg/message', controller.socialMedia.queryTGMsgStatus);
+    router.get('/api/v1/tg/message/:group_id', controller.socialMedia.queryTGGroupMsgStatus);
+    router.get('/api/v1/tg/message/:group_id/:message_id', controller.socialMedia.queryTGStatus);
     router.get('/api/v1/statistic', controller.statistic.getData);
 
     router.get('/assets/erc-1155/:contracts/:token_id', controller.assetsERC1155.getURIAssets);

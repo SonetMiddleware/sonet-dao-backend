@@ -301,16 +301,28 @@ class SocialMediaController extends Controller {
         ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.actionOnTGMsg(param))
     }
 
-    async queryTGMsgStatus() {
+    async queryTGGroupMsgStatus() {
         const {ctx} = this;
+        let group_id = ctx.params.group_id;
         let param = ctx.request.query;
         const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
-        if (!param.group_id) {
+        if (!group_id) {
             ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: group_id", {})
             return;
         }
-        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGMsgStatus(param.group_id,
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGGroupMsgStatus(group_id,
             param.order_by, limit, offset))
+    }
+
+    async queryTGStatus() {
+        const {ctx} = this;
+        let group_id = ctx.params.group_id;
+        let message_id = ctx.params.message_id;
+        if (group_id === undefined || message_id === undefined || group_id === "" || message_id === "") {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param", {})
+            return;
+        }
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGMsgStatus(group_id, message_id))
     }
 }
 

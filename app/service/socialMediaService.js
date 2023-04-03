@@ -261,7 +261,7 @@ class SocialMediaService extends Service {
             const result = await mysql.update(`tg_msg_status`, field, {
                 where: where
             })
-           return result.affectedRows === 1;
+            return result.affectedRows === 1;
         } else {
             const existed = await mysql.get(`tg_msg_status`, where);
             if (existed) {
@@ -288,7 +288,7 @@ class SocialMediaService extends Service {
         }
     }
 
-    async queryTGMsgStatus(group_id, order_by, limit, offset) {
+    async queryTGGroupMsgStatus(group_id, order_by, limit, offset) {
         if (!order_by) {
             order_by = 'like';
         }
@@ -317,6 +317,19 @@ class SocialMediaService extends Service {
         }
         let data = await mysql.query(sql, [group_id]);
         return {total: total, data: data};
+    }
+
+    async queryTGMsgStatus(group_id, message_id) {
+        let sql = `select nft_contract,
+                          nft_token_id,
+                          sum(\`like\`) as 'like',
+                          sum(unlike)   as unlike,
+                          sum(follow)   as follow
+                   from tg_msg_status
+                   where group_id = ?
+                     and message_id = ?
+                   group by nft_contract, nft_token_id`;
+        return await this.app.mysql.get('app').query(sql, [group_id, message_id]);
     }
 }
 
