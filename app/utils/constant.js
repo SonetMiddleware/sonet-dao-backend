@@ -32,6 +32,10 @@ const CHAIN_NAME_TON_TESTNET = "TONtest"
 const ERC721 = '721';
 const ERC1155 = '1155';
 
+const MSG_ACTION_LIKE = 'like';
+const MSG_ACTION_UNLIKE = 'unlike';
+const MSG_ACTION_FOLLOW = 'follow';
+
 function getExplorer(chainName) {
     if (chainName === CHAIN_NAME_MAINNET) {
         return "https://api.etherscan.io/api";
@@ -66,6 +70,10 @@ function getNodeUrl(chainName) {
 
 const TON_CENTER_API_KEY = env.TON_CENTER_API;
 
+function checkMsgAction(action) {
+    return action === MSG_ACTION_LIKE || action === MSG_ACTION_UNLIKE || action === MSG_ACTION_FOLLOW;
+}
+
 module.exports = {
     zeroAddr,
     OrderStatusInit,
@@ -99,5 +107,7 @@ module.exports = {
     TON_CENTER_API_KEY,
 
     ERC721,
-    ERC1155
+    ERC1155,
+
+    MSG_ACTION_LIKE, MSG_ACTION_UNLIKE, MSG_ACTION_FOLLOW, checkMsgAction
 }

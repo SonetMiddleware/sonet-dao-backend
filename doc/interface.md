@@ -63,7 +63,7 @@ The results of the request will be included in this field.
 
 ## Social Media-Related APIs
 
-Twitter, Facebook, ...
+Twitter, Facebook, Telegram...
 
 ### Bind Social Media Account and User Address
 
@@ -327,9 +327,73 @@ return:
 }
 ```
 
+### Like&Unlike&Follow Telegram Message
+
+method: POST
+
+URL: /api/v1/tg/message
+
+Parameters:
+
+```json
+{
+  "action": "like | unlike | follow",
+  "undo": false,
+  "group_id": "",
+  "message_id": "",
+  "sender": "",
+  "nft_contract": "",
+  "nft_token_id": ""
+}
+```
+
+> if `undo`, revert users' action
+>
+> `like` and `unlike` is mutually exclusive
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": ""
+}
+```
+
+### Query Telegram Message Status
+
+method: get
+
+URL: /api/v1/tg/message?group_id=xxx&order_by=xxx&page=xxx&gap=xxx
+
+> order by `like | unlike | follow`, if not defined, order by `like`
+
+returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 1000,
+    "data": [
+      {
+        "message_id": "",
+        "nft_contract": "",
+        "nft_token_id": "",
+        "like": 10,
+        "unlike": 19,
+        "follow": 1
+      }
+    ]
+  }
+}
+```
+
 ## Invitation code
 
-### Generate inivitation code
+### Generate invitation code
 
 Method: POST
 

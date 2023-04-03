@@ -5,6 +5,7 @@ const web3 = new Web3();
 const constant = require('../utils/constant');
 const utils = require("../utils/utils");
 const {isFlowNetwork, verifyFlowSig, isTONNetwork, verifyTonSig, verifyTGRobot} = require("../utils/utils");
+const {checkMsgAction, RESP_CODE_ILLEGAL_PARAM} = require("../utils/constant");
 
 class SocialMediaController extends Controller {
     async bindAddr() {
@@ -285,6 +286,31 @@ class SocialMediaController extends Controller {
             contract: 'address'
         }, nftParam);
         return nftParam;
+    }
+
+    async actionOnTGMsg() {
+        const {ctx} = this;
+        let param = ctx.request.body;
+        ctx.validate({
+            nft_contract: 'address'
+        }, param);
+        if (!checkMsgAction(param.action)) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: action", {})
+            return;
+        }
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.actionOnTGMsg(param))
+    }
+
+    async queryTGMsgStatus() {
+        const {ctx} = this;
+        let param = ctx.request.query;
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        if (!param.group_id) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: group_id", {})
+            return;
+        }
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGMsgStatus(param.group_id,
+            param.order_by, limit, offset))
     }
 }
 

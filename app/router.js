@@ -10,6 +10,7 @@ module.exports = app => {
     router.post('/api/v1/referral/accept', controller.socialMedia.acceptReferral);
     router.post('/api/v1/bind-addr/record', controller.socialMedia.recordContentId);
     router.post('/api/v1/unbind-addr', controller.socialMedia.unbind);
+    router.post('/api/v1/tg/message', controller.socialMedia.actionOnTGMsg);
     router.post('/api/v1/favorite-nft', controller.nft.favoriteNFT);
     router.post('/api/v1/nft/register', controller.nft.regNFT);
     router.post('/api/v1/nft/collection/gen', controller.nft.genTONCollectionDeployTx);
@@ -44,6 +45,7 @@ module.exports = app => {
     router.get('/api/v1/twitter-nft/counts', controller.socialMedia.getNFTTwitterCounts);
     router.get('/api/v1/twitter-nft/snapshots', controller.socialMedia.getNFTTwitterSnapshot);
     router.get('/api/v1/twitter-nft', controller.socialMedia.getTwitterNFT);
+    router.get('/api/v1/tg/message', controller.socialMedia.queryTGMsgStatus);
     router.get('/api/v1/statistic', controller.statistic.getData);
 
     router.get('/assets/erc-1155/:contracts/:token_id', controller.assetsERC1155.getURIAssets);

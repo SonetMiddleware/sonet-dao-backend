@@ -1,7 +1,7 @@
 const Service = require('egg').Service;
 const utils = require('web3').utils;
 const constant = require('../utils/constant');
-const {BIND_STATUS_ACTIVE} = require("../utils/constant");
+const {BIND_STATUS_ACTIVE, MSG_ACTION_FOLLOW, MSG_ACTION_LIKE, MSG_ACTION_UNLIKE} = require("../utils/constant");
 const {getTwitterCounts} = require("../utils/utils");
 
 class SocialMediaService extends Service {
@@ -246,6 +246,77 @@ class SocialMediaService extends Service {
                 offset: offset,
             });
         }
+    }
+
+    async actionOnTGMsg(params) {
+        const mysql = await this.app.mysql.get('app');
+        const where = {
+            group_id: params.group_id,
+            message_id: params.message_id,
+            sender: params.sender,
+        };
+        if (params.undo) {
+            const field = {};
+            field[params.action] = false;
+            const result = await mysql.update(`tg_msg_status`, field, {
+                where: where
+            })
+           return result.affectedRows === 1;
+        } else {
+            const existed = await mysql.get(`tg_msg_status`, where);
+            if (existed) {
+                existed[params.action] = true;
+                if (params.action === MSG_ACTION_LIKE) {
+                    existed.unlike = false;
+                } else if (params.action === MSG_ACTION_UNLIKE) {
+                    existed.like = false;
+                }
+                const res = await mysql.update(`tg_msg_status`, existed, {where: where})
+                return res.affectedRows === 1;
+            } else {
+                const field = {
+                    group_id: params.group_id,
+                    message_id: params.message_id,
+                    sender: params.sender,
+                    nft_contract: params.nft_contract,
+                    nft_token_id: params.nft_token_id,
+                };
+                field[params.action] = true;
+                const res = await mysql.insert(`tg_msg_status`, field);
+                return res.affectedRows === 1;
+            }
+        }
+    }
+
+    async queryTGMsgStatus(group_id, order_by, limit, offset) {
+        if (!order_by) {
+            order_by = 'like';
+        }
+        const mysql = await this.app.mysql.get('app');
+        let total = await mysql.query(`select count(distinct (message_id)) as total
+                                       from tg_msg_status
+                                       where group_id = ?`, [group_id]);
+        if (!total || total.length === 0) {
+            return {total: 0, data: {}}
+        }
+        total = total[0].total;
+        let sql = `select message_id,
+                          nft_contract,
+                          nft_token_id,
+                          sum(\`like\`) as 'like',
+                          sum(unlike)   as unlike,
+                          sum(follow)   as follow
+                   from tg_msg_status
+                   where group_id = ?
+                   group by message_id, nft_contract, nft_token_id
+                   order by \`${order_by}\` desc`;
+        if (offset && limit) {
+            sql += ' limit ' + offset + ', ' + limit
+        } else if (limit) {
+            sql += ' limit ' + limit;
+        }
+        let data = await mysql.query(sql, [group_id]);
+        return {total: total, data: data};
     }
 }
 
