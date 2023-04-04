@@ -921,6 +921,7 @@ Response:
         "addr": "EQCkeUfuGycIp6EJN3LdqhdlOd7aNdLEqxk5LnQYij1Q6PpT",
         "image": "image url",
         "cover_image": "cover image url",
+        "enable_other_mint": false,
         "deployed": false
       }
     ]

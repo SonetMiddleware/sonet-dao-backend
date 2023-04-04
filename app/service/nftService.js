@@ -175,6 +175,7 @@ class NFTService extends Service {
                 description: params.metadata.description,
                 social_links: params.metadata.social_links.join(","),
                 creator: params.owner,
+                enable_other_mint: params.enable_other_mint,
                 addr: nftCollectionAddress,
             });
         }
@@ -310,6 +311,7 @@ class NFTService extends Service {
                 addr: item.addr,
                 image: item.image,
                 cover_image: item.cover_image,
+                enable_other_mint: item.enable_other_mint,
                 deployed: item.deployed,
             })
         }

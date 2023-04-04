@@ -11,3 +11,7 @@ create table tg_msg_status
     primary key (group_id, message_id, sender)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+alter table ton_collection_metadata
+    add enable_other_mint bool default false not null after creator;
+
