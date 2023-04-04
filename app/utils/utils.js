@@ -13,6 +13,7 @@ const {Address, beginCell, Cell, contractAddress, toNano} = require("ton-core");
 const {WalletContractV4, WalletContractV3R2, safeSignVerify, TonClient} = require("ton");
 const {mnemonicToPrivateKey} = require("ton-crypto");
 const fs = require("fs");
+const MAX_PAGE_GAP = 1000;
 
 function parsePageParamToDBParam(page, gap) {
     if (!page) {
@@ -20,6 +21,9 @@ function parsePageParamToDBParam(page, gap) {
     }
     if (!gap) {
         gap = 10;
+    }
+    if (gap > MAX_PAGE_GAP) {
+        gap = MAX_PAGE_GAP;
     }
     if (+page < 1) {
         return [+gap, 0];

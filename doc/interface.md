@@ -327,11 +327,38 @@ return:
 }
 ```
 
-### Like&Unlike&Follow Telegram Message
+### Record TG Message Data
 
 method: POST
 
 URL: /api/v1/tg/message
+
+Parameters:
+
+```json
+{
+  "group_id": "",
+  "message_id": "",
+  "type": "",
+  "data": ""
+}
+```
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": null
+}
+```
+
+### Like&Unlike&Follow Telegram Message
+
+method: POST
+
+URL: /api/v1/tg/message/act
 
 Parameters:
 
@@ -365,9 +392,11 @@ Returns:
 
 method: get
 
-URL: /api/v1/tg/message/:group_id?order_by=xxx&page=xxx&gap=xxx
+URL: /api/v1/tg/message/:group_id?order_by=xxx&origin_msg=1&page=xxx&gap=xxx
 
 > order by `like | unlike | follow`, if not defined, order by `like`
+> 
+> if origin_msg owned any value(for example, origin_msg=true/false/0/1), return msg type and data
 
 returns:
 
@@ -380,6 +409,8 @@ returns:
     "data": [
       {
         "message_id": "",
+        "type": "",
+        "data": "",
         "nft_contract": "",
         "nft_token_id": "",
         "like": 10,
@@ -395,7 +426,9 @@ returns:
 
 method: get
 
-URL: /api/v1/tg/message/:group_id/:message_id
+URL: /api/v1/tg/message/:group_id/:message_id?origin_msg=true
+
+> if origin_msg owned any value(for example, origin_msg=true/false/0/1), return msg type and data
 
 returns:
 
@@ -405,6 +438,8 @@ returns:
   "error": "",
   "data": [
     {
+      "type": "",
+      "data": "",
       "nft_contract": "",
       "nft_token_id": "",
       "like": 10,

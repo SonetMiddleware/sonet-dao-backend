@@ -10,7 +10,8 @@ module.exports = app => {
     router.post('/api/v1/referral/accept', controller.socialMedia.acceptReferral);
     router.post('/api/v1/bind-addr/record', controller.socialMedia.recordContentId);
     router.post('/api/v1/unbind-addr', controller.socialMedia.unbind);
-    router.post('/api/v1/tg/message', controller.socialMedia.actionOnTGMsg);
+    router.post('/api/v1/tg/message/act', controller.socialMedia.actionOnTGMsg);
+    router.post('/api/v1/tg/message', controller.socialMedia.recordTGMsg);
     router.post('/api/v1/favorite-nft', controller.nft.favoriteNFT);
     router.post('/api/v1/nft/register', controller.nft.regNFT);
     router.post('/api/v1/nft/collection/gen', controller.nft.genTONCollectionDeployTx);

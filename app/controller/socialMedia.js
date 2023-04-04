@@ -288,12 +288,26 @@ class SocialMediaController extends Controller {
         return nftParam;
     }
 
+    async recordTGMsg() {
+        const {ctx} = this;
+        if (!verifyTGRobot(ctx.request)) {
+            ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "illegal param: sig");
+            return;
+        }
+        let params = ctx.request.body;
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.recordTGMsg(params));
+    }
+
     async actionOnTGMsg() {
         const {ctx} = this;
         let param = ctx.request.body;
         ctx.validate({
             nft_contract: 'address'
         }, param);
+        if (!verifyTGRobot(ctx.request)) {
+            ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "illegal param: sig");
+            return;
+        }
         if (!checkMsgAction(param.action)) {
             ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: action", {})
             return;
@@ -311,7 +325,7 @@ class SocialMediaController extends Controller {
             return;
         }
         ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGGroupMsgStatus(group_id,
-            param.order_by, limit, offset))
+            param.order_by, param.origin_msg, limit, offset))
     }
 
     async queryTGStatus() {
@@ -322,7 +336,9 @@ class SocialMediaController extends Controller {
             ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param", {})
             return;
         }
-        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGMsgStatus(group_id, message_id))
+        let param = ctx.request.query;
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGMsgStatus(group_id, message_id,
+            param.origin_msg))
     }
 }
 

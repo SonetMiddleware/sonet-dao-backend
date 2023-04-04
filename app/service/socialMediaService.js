@@ -248,6 +248,12 @@ class SocialMediaService extends Service {
         }
     }
 
+    async recordTGMsg(params) {
+        await this.app.mysql.get('app').query(`replace into tg_msg
+                                               values (?, ?, ?, ?)`,
+            [params.group_id, params.message_id, params.type, params.data]);
+    }
+
     async actionOnTGMsg(params) {
         const mysql = await this.app.mysql.get('app');
         const where = {
@@ -288,7 +294,7 @@ class SocialMediaService extends Service {
         }
     }
 
-    async queryTGGroupMsgStatus(group_id, order_by, limit, offset) {
+    async queryTGGroupMsgStatus(group_id, order_by, query_origin_msg, limit, offset) {
         if (!order_by) {
             order_by = 'like';
         }
@@ -316,10 +322,21 @@ class SocialMediaService extends Service {
             sql += ' limit ' + limit;
         }
         let data = await mysql.query(sql, [group_id]);
+        if (query_origin_msg) {
+            let msgIds = data.map(item => item.message_id);
+            let msgRaw = await mysql.select(`tg_msg`, {where: {group_id: group_id, message_id: msgIds}});
+            for (const msg of data) {
+                let raw = msgRaw.find(item => item.message_id === msg.message_id);
+                if (raw) {
+                    msg.type = raw.type;
+                    msg.data = raw.data;
+                }
+            }
+        }
         return {total: total, data: data};
     }
 
-    async queryTGMsgStatus(group_id, message_id) {
+    async queryTGMsgStatus(group_id, message_id, query_origin_msg) {
         let sql = `select nft_contract,
                           nft_token_id,
                           sum(\`like\`) as 'like',
@@ -329,7 +346,20 @@ class SocialMediaService extends Service {
                    where group_id = ?
                      and message_id = ?
                    group by nft_contract, nft_token_id`;
-        return await this.app.mysql.get('app').query(sql, [group_id, message_id]);
+        let data = await this.app.mysql.get('app').query(sql, [group_id, message_id]);
+        if (!data || data.length === 0) {
+            return [];
+        }
+        if (query_origin_msg) {
+            let msgRaw = await this.app.mysql.get('app').get(`tg_msg`, {group_id: group_id, message_id: message_id});
+            if (msgRaw !== undefined) {
+                for (const d of data) {
+                    d.type = msgRaw.type;
+                    d.data = msgRaw.data;
+                }
+            }
+        }
+        return data;
     }
 }
 

@@ -15,3 +15,13 @@ create table tg_msg_status
 alter table ton_collection_metadata
     add enable_other_mint bool default false not null after creator;
 
+create table tg_msg
+(
+    group_id   varchar(32) not null,
+    message_id varchar(32) not null,
+    type       varchar(32) not null,
+    data       longtext    not null,
+    primary key (group_id, message_id)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
