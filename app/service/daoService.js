@@ -166,6 +166,9 @@ class DAOService extends Service {
 
     async queryCollectionByNFT(contract) {
         const item = await this.app.mysql.get('chainData').get('collection_map', {contract});
+        if (!item || item.length===0) {
+            return {};
+        }
         const collection = await this.app.mysql.get('chainData').get('collection', {collection_id: item.collection_id});
         return {
             id: collection.collection_id,
@@ -204,7 +207,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                    into nft_reg
+                         into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -226,7 +229,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                    into nft_reg
+                         into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -584,11 +587,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count (*) as proposal_num
-                     from ${appDataDBName}.proposal
-                     group by collection_id) p
-                 on c.collection_id = p.collection_id
-                     set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count(*) as proposal_num
+                                                from ${appDataDBName}.proposal
+                                                group by collection_id) p
+                    on c.collection_id = p.collection_id
+                 set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);
