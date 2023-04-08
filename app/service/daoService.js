@@ -166,7 +166,7 @@ class DAOService extends Service {
 
     async queryCollectionByNFT(contract) {
         const item = await this.app.mysql.get('chainData').get('collection_map', {contract});
-        if (!item || item.length===0) {
+        if (!item || item.length === 0) {
             return {};
         }
         const collection = await this.app.mysql.get('chainData').get('collection', {collection_id: item.collection_id});
@@ -567,9 +567,10 @@ class DAOService extends Service {
         if (!await this.queryProposalPermission(chainName, collection_id, creatorAddr)) {
             throw new Error("illegal proposer");
         }
+        const proposalId = Web3.utils.soliditySha3(collection_id + title + description);
         await this.app.mysql.get('app').insert('proposal', {
             collection_id,
-            id: Web3.utils.soliditySha3(collection_id + title + description),
+            id: proposalId,
             creator: creatorAddr,
             snapshot_block,
             title,
@@ -581,7 +582,7 @@ class DAOService extends Service {
             voter_type
         });
         if (!this.app.config.updateProposalNum) {
-            return
+            return proposalId;
         }
         try {
             let appDataDBName = this.app.config.mysql.clients.app.database;
@@ -596,6 +597,7 @@ class DAOService extends Service {
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);
         }
+        return proposalId;
     }
 
     async vote(chainName, voter, collectionId, proposalId, item) {

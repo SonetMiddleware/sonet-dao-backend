@@ -1382,9 +1382,7 @@ Parameters:
 > msg).then(res=>{ console.log(JSON.stringify(res)); })
 >
 > The result of the sig is like: "\[{"f_type":"CompositeSignature","f_vsn":"1.0.0","addr":"0x5f27f57d592aa038","keyId":
-> 1,"signature":"
->
-469dcd5d893c970c2323ac5c1790f1b49b18ce92c18969749d927b76812fa81370e6561f022f95d9677dfb07c1a67ee7cc30bd519086f6098ff25dbcf7575519"}\]"
+> 1,"signature":"469dcd5d893c970c2323ac5c1790f1b49b18ce92c18969749d927b76812fa81370e6561f022f95d9677dfb07c1a67ee7cc30bd519086f6098ff25dbcf7575519"}\]"
 
 Return:
 
@@ -1392,7 +1390,9 @@ Return:
 {
   "code": "",
   "error": "",
-  "data": {}
+  "data": {
+    "id": "0x1213213213"
+  }
 }
 ```
 
