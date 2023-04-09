@@ -17,6 +17,7 @@ const {
 } = require("../utils/utils");
 const {sha256} = require("js-sha256");
 const {uploadFileToIPFS} = require("../utils/ipfs");
+const crypto = require('crypto');
 
 class DAOService extends Service {
 
@@ -567,7 +568,10 @@ class DAOService extends Service {
         if (!await this.queryProposalPermission(chainName, collection_id, creatorAddr)) {
             throw new Error("illegal proposer");
         }
-        const proposalId = Web3.utils.soliditySha3(collection_id + title + description);
+        const hash = crypto.createHash('md5');
+        hash.update(collection_id + title + description);
+        const proposalId = hash.digest('hex');
+        console.log(proposalId, collection_id, title, description);
         await this.app.mysql.get('app').insert('proposal', {
             collection_id,
             id: proposalId,
