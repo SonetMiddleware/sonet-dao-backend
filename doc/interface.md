@@ -450,6 +450,34 @@ returns:
 }
 ```
 
+### Query Telegram Raw Message
+
+method: get
+
+URL: /api/v1/tg/raw-message?group_id=xxx&message_id=xxx&page=xxx&gap=xxx
+
+> if `message_id` is not defined, return all raw message of `group_id`
+
+returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 1000,
+    "data": [
+      {
+        "group_id": "",
+        "message_id": "",
+        "type": "",
+        "data": ""
+      }
+    ]
+  }
+}
+```
+
 ## Invitation code
 
 ### Generate invitation code

@@ -340,6 +340,18 @@ class SocialMediaController extends Controller {
         ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGMsgStatus(group_id, message_id,
             param.origin_msg))
     }
+
+    async queryTGRawMsg() {
+        const {ctx} = this;
+        let param = ctx.request.query;
+        if (!param.group_id) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: group_id", {})
+            return;
+        }
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGRawMsg(param.group_id,
+            param.message_id, limit, offset))
+    }
 }
 
 module.exports = SocialMediaController;

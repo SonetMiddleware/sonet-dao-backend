@@ -361,6 +361,32 @@ class SocialMediaService extends Service {
         }
         return data;
     }
+
+    async queryTGRawMsg(group_id, message_id, limit, offset) {
+        let sql = `select count(*) as total
+                   from tg_msg
+                   where group_id = ?`;
+        let params = [group_id];
+        let condition = {
+            where: {group_id: group_id},
+        }
+        if (message_id !== undefined) {
+            condition.where.message_id = message_id;
+            sql += `and message_id=?`
+            params.push(message_id);
+        }
+        let total = await this.app.mysql.get('app').query(sql, params);
+        if (!total || total.length === 0 || total[0].total === 0) {
+            return {total: 0, data: []};
+        }
+        if (limit) {
+            condition.limit = limit
+        }
+        if (offset) {
+            condition.offset = offset;
+        }
+        return {total: total[0].total, data: await this.app.mysql.get('app').select(`tg_msg`, condition)};
+    }
 }
 
 module.exports = SocialMediaService;
