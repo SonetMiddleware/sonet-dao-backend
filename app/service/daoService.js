@@ -9,7 +9,7 @@ const {
     VOTER_TYPE_PER_ADDR,
     VOTER_TYPE_PER_NFT,
     VOTER_TYPE_OTHER_TOKEN,
-    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET
+    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET, CFG_HIDDEN_0_PROPOSAL_DAO
 } = require("../utils/constant");
 const {
     getFlowNFTs, isFlowNetwork, getFlowNFTIdsOfAccount, getNFTKinds, isTONNetwork,
@@ -208,7 +208,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                         into nft_reg
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -230,7 +230,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                         into nft_reg
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
             if (collectionInfo) {
@@ -281,6 +281,7 @@ class DAOService extends Service {
             } else {
                 let sql = `from collection
                        where dao_create_block > 0
+                         and hidden = false
                          and chain_name like '%${chainName}%'
                          and collection.collection_id in (select collection_id
                                                           from collection_map
@@ -302,6 +303,7 @@ class DAOService extends Service {
         } else {
             let sql = `from collection
                        where dao_create_block > 0
+                         and hidden = false
                          and chain_name like '%${chainName}%'`
             if (name) {
                 sql += ` and dao_name like '%${name}%'`;
@@ -338,7 +340,7 @@ class DAOService extends Service {
         return {"total": total, data: data};
     }
 
-    async queryFlowAndTonDaoList(chainName, addr, name, limit, offset) {
+    async queryFlowAndTonDaoList(chainName, addr, name, hidden0ProposalDao, limit, offset) {
         let total = 0, result = [];
         let collections = await this.getTONAndFlowUserAllCollectionIds(chainName, addr);
         if (collections.length === 0) {
@@ -346,6 +348,7 @@ class DAOService extends Service {
         }
         let sql = `from collection
                        where dao_create_block > 0
+                         and hidden = false
                          and chain_name like '%${chainName}%'
                          and collection_id in (?)`;
         if (name) {
@@ -592,11 +595,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count(*) as proposal_num
-                                                from ${appDataDBName}.proposal
-                                                group by collection_id) p
-                    on c.collection_id = p.collection_id
-                 set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count (*) as proposal_num
+                     from ${appDataDBName}.proposal
+                     group by collection_id) p
+                 on c.collection_id = p.collection_id
+                     set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);

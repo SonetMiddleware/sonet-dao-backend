@@ -36,6 +36,8 @@ const MSG_ACTION_LIKE = 'like';
 const MSG_ACTION_UNLIKE = 'unlike';
 const MSG_ACTION_FOLLOW = 'follow';
 
+const CFG_HIDDEN_0_PROPOSAL_DAO = 'hidden_0_proposal_dao';
+
 function getExplorer(chainName) {
     if (chainName === CHAIN_NAME_MAINNET) {
         return "https://api.etherscan.io/api";
@@ -109,5 +111,6 @@ module.exports = {
     ERC721,
     ERC1155,
 
-    MSG_ACTION_LIKE, MSG_ACTION_UNLIKE, MSG_ACTION_FOLLOW, checkMsgAction
+    MSG_ACTION_LIKE, MSG_ACTION_UNLIKE, MSG_ACTION_FOLLOW, checkMsgAction,
+    CFG_HIDDEN_0_PROPOSAL_DAO
 }

@@ -362,7 +362,7 @@ class SocialMediaService extends Service {
         return data;
     }
 
-    async queryTGRawMsg(group_id, message_id, limit, offset) {
+    async queryTGRawMsg(group_id, message_id,type,data, limit, offset) {
         let sql = `select count(*) as total
                    from tg_msg
                    where group_id = ?`;
@@ -372,8 +372,18 @@ class SocialMediaService extends Service {
         }
         if (message_id !== undefined) {
             condition.where.message_id = message_id;
-            sql += `and message_id=?`
+            sql += ` and message_id=?`
             params.push(message_id);
+        }
+        if (type !== undefined) {
+            condition.where.type = type;
+            sql += ` and type=?`
+            params.push(type);
+        }
+        if (data !== undefined) {
+            condition.where.data = data;
+            sql += ` and data=?`
+            params.push(data);
         }
         let total = await this.app.mysql.get('app').query(sql, params);
         if (!total || total.length === 0 || total[0].total === 0) {

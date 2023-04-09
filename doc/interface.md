@@ -395,7 +395,7 @@ method: get
 URL: /api/v1/tg/message/:group_id?order_by=xxx&origin_msg=1&page=xxx&gap=xxx
 
 > order by `like | unlike | follow`, if not defined, order by `like`
-> 
+>
 > if origin_msg owned any value(for example, origin_msg=true/false/0/1), return msg type and data
 
 returns:
@@ -454,9 +454,11 @@ returns:
 
 method: get
 
-URL: /api/v1/tg/raw-message?group_id=xxx&message_id=xxx&page=xxx&gap=xxx
+URL: /api/v1/tg/raw-message?group_id=xxx&message_id=xxx&type=xxx&data=xxx&page=xxx&gap=xxx
 
 > if `message_id` is not defined, return all raw message of `group_id`
+>
+> message_id,type,data is optional
 
 returns:
 
@@ -1410,7 +1412,9 @@ Parameters:
 > msg).then(res=>{ console.log(JSON.stringify(res)); })
 >
 > The result of the sig is like: "\[{"f_type":"CompositeSignature","f_vsn":"1.0.0","addr":"0x5f27f57d592aa038","keyId":
-> 1,"signature":"469dcd5d893c970c2323ac5c1790f1b49b18ce92c18969749d927b76812fa81370e6561f022f95d9677dfb07c1a67ee7cc30bd519086f6098ff25dbcf7575519"}\]"
+> 1,"signature":"
+>
+469dcd5d893c970c2323ac5c1790f1b49b18ce92c18969749d927b76812fa81370e6561f022f95d9677dfb07c1a67ee7cc30bd519086f6098ff25dbcf7575519"}\]"
 
 Return:
 

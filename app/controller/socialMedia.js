@@ -350,7 +350,7 @@ class SocialMediaController extends Controller {
         }
         const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
         ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGRawMsg(param.group_id,
-            param.message_id, limit, offset))
+            param.message_id, param.type, param.data, limit, offset))
     }
 }
 
