@@ -35,15 +35,15 @@ class DAOService extends Service {
                 this.app.logger.error("createTGDao: createDaoAtTon, ", e);
             }
         }
+        // upload image to ipfs
+        try {
+            param.collection_image = await uploadFileToIPFS(param.collection_image);
+        } catch (e) {
+            this.app.logger.error("createTGDao: upload image failed, ", e);
+        }
         const mysql = await this.app.mysql.get('chainData');
         const conn = await mysql.beginTransaction();
         try {
-            // upload image to ipfs
-            try {
-                param.collection_image = await uploadFileToIPFS(param.collection_image);
-            } catch (e) {
-                this.app.logger.error("createTGDao: upload image failed, ", e);
-            }
             await conn.insert('collection_map', {
                 collection_id: param.collection_id,
                 contract: param.contract,
@@ -81,49 +81,42 @@ class DAOService extends Service {
             if (collectionIds.length === 0) {
                 return {total: 0, data: []}
             }
-            let sql = `from collection
+            let params = [chainName, collectionIds];
+            let sql = ` from collection
                        where chain_name = ?
                          and collection_id in (?) `;
             if (collectionName) {
-                sql += `and collection_name like '%${collectionName}%'`;
+                sql += `and collection_name like ?`;
+                params.push(`%${collectionName}%`);
             }
-            let totalRes = await mysql.query('select count(*) as total ' + sql, [chainName, collectionIds]);
+            let totalRes = await mysql.query('select count(*) as total ' + sql, params);
             total = totalRes[0].total;
             if (offset && limit) {
                 sql += ' limit ' + offset + ', ' + limit
             } else if (limit) {
                 sql += ' limit ' + limit;
             }
-            result = await mysql.query('select *' + sql, [chainName, collectionIds]);
+            result = await mysql.query('select *' + sql, params);
         } else {
-            let sql = `select count(*)
-                       from collection
+            let sql = ` from collection
                        where collection.collection_id
                                  in (select collection_id
                                      from collection_map
                                      where contract in
                                            (select distinct contract from nft_${chainName} where owner = ?))`;
+            let params = [addr];
             if (collectionName) {
-                sql += `and collection_name like '%${collectionName}%'`;
+                sql += `and collection_name like ?`;
+                params.push(`%${collectionName}%`);
             }
-            total = await mysql.query(sql, addr);
-
-            total = total[0]['count(*)'];
-            sql = `select *
-                   from collection
-                   where collection.collection_id in (select collection_id
-                                                      from collection_map
-                                                      where contract in
-                                                            (select distinct contract from nft_${chainName} where owner = ?))`
-            if (collectionName) {
-                sql += `and collection_name like '%${collectionName}%'`;
-            }
+            total = await mysql.query('select count(*) as total' + sql, params);
+            total = total[0].total;
             if (offset && limit) {
                 sql += ' limit ' + offset + ', ' + limit
             } else if (limit) {
                 sql += ' limit ' + limit;
             }
-            result = await mysql.query(sql, addr);
+            result = await mysql.query('select * ' + sql, params);
         }
         const data = result.map(item => {
             return {
@@ -188,6 +181,9 @@ class DAOService extends Service {
     async queryCollectionNFTs(chain_name, collectionId, addr, limit, offset) {
         const mysql = this.app.mysql.get('chainData');
         const collectionInfo = await mysql.get('collection', {collection_id: collectionId});
+        if (!collectionInfo) {
+            return {total: 0, data: {}};
+        }
         const items = await mysql.select('collection_map', {where: {collection_id: collectionId}});
         if (items.length === 0) {
             return {
@@ -198,33 +194,21 @@ class DAOService extends Service {
                 data: null,
             }
         }
-        if (isFlowNetwork(chain_name)) {
-            const catalogToContractMap = {};
-            for (const item of items) {
-                catalogToContractMap[item.collection_id] = item.contract;
-            }
-            const result = await getFlowNFTs(chain_name, addr, catalogToContractMap, limit, offset);
-            for (const nft of result.data) {
-                let nft_id = sha256(chain_name + nft.contract + nft.token_id);
-                await this.app.mysql.get('app').query(
-                    `replace
-                    into nft_reg
-                     values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
-            }
-            if (collectionInfo) {
-                result.collection_id = collectionInfo.collection_id;
-                result.collection_name = collectionInfo.collection_name;
-                result.collection_img = collectionInfo.collection_img;
-            }
-            return result;
-        }
-        if (isTONNetwork(chain_name)) {
-            const result = {total: 0, data: []};
-            for (const item of items) {
-                let nfts = addr !== undefined ? await getTONNFTs(chain_name, addr, item.contract, limit, offset) :
-                    await getTonCollectionNFTs(chain_name, item.contract, limit, offset);
-                result.total += nfts.total;
-                result.data.push(...nfts.data);
+        let result = {total: 0, data: []};
+        if (isFlowNetwork(chain_name) || isTONNetwork(chain_name)) {
+            if (isFlowNetwork(chain_name)) {
+                const catalogToContractMap = {};
+                for (const item of items) {
+                    catalogToContractMap[item.collection_id] = item.contract;
+                }
+                result = await getFlowNFTs(chain_name, addr, catalogToContractMap, limit, offset);
+            } else if (isTONNetwork(chain_name)) {
+                for (const item of items) {
+                    let nfts = addr !== undefined ? await getTONNFTs(chain_name, addr, item.contract, limit, offset) :
+                        await getTonCollectionNFTs(chain_name, item.contract, limit, offset);
+                    result.total += nfts.total;
+                    result.data.push(...nfts.data);
+                }
             }
             for (const nft of result.data) {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
@@ -233,42 +217,37 @@ class DAOService extends Service {
                     into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
-            if (collectionInfo) {
-                result.collection_id = collectionInfo.collection_id;
-                result.collection_name = collectionInfo.collection_name;
-                result.collection_img = collectionInfo.collection_img;
+        } else {
+            const contracts = items.map((item) => item.contract);
+            let sql = `select *
+                       from nft_${chain_name}
+                       where `;
+            let queryTotalSql = `select count(*)
+                                 from nft_${chain_name}
+                                 where `;
+            const whereClause = ['contract in (?)'];
+            const param = [contracts];
+            if (addr) {
+                whereClause.push('owner=?');
+                param.push(addr);
             }
-            return result;
+            sql += whereClause.join(' and ') + ' order by contract, token_id';
+            queryTotalSql += whereClause.join(' and ');
+            if (offset && limit) {
+                sql += ' limit ' + offset + ', ' + limit
+            } else if (limit) {
+                sql += ' limit ' + limit;
+            }
+            let total = await mysql.query(queryTotalSql, param);
+            result.total = total[0]['count(*)'];
+            result.data = await mysql.query(sql, param);
         }
-        const contracts = items.map((item) => item.contract);
-        let sql = `select *
-                   from nft_${chain_name}
-                   where `;
-        let queryTotalSql = `select count(*)
-                             from nft_${chain_name}
-                             where `;
-        const whereClause = ['contract in (?)'];
-        const param = [contracts];
-        if (addr) {
-            whereClause.push('owner=?');
-            param.push(addr);
-        }
-        sql += whereClause.join(' and ') + ' order by contract, token_id';
-        queryTotalSql += whereClause.join(' and ');
-        if (offset && limit) {
-            sql += ' limit ' + offset + ', ' + limit
-        } else if (limit) {
-            sql += ' limit ' + limit;
-        }
-        let total = await mysql.query(queryTotalSql, param);
-        total = total[0]['count(*)'];
-        const results = await mysql.query(sql, param);
         return {
-            total: total,
+            total: result.total,
             collection_id: collectionInfo.collection_id,
             collection_name: collectionInfo.collection_name,
             collection_img: collectionInfo.collection_img,
-            data: results
+            data: result.data
         };
     }
 
@@ -287,10 +266,12 @@ class DAOService extends Service {
                                                           from collection_map
                                                           where contract in
                                                                 (select distinct contract from nft_${chainName} where owner = ?))`;
+                let params = [addr];
                 if (name) {
-                    sql += ` and dao_name like '%${name}%'`;
+                    sql += ` and dao_name like ?`;
+                    params.push(`%${name}%`);
                 }
-                total = await mysql.query('select count(*) ' + sql, [addr]);
+                total = await mysql.query('select count(*) ' + sql, params);
                 total = total[0]['count(*)'];
                 sql += ' order by weight desc, proposal_num desc, collection_id';
                 if (offset && limit) {
@@ -298,17 +279,19 @@ class DAOService extends Service {
                 } else if (limit) {
                     sql += ' limit ' + limit;
                 }
-                result = await mysql.query('select * ' + sql, [addr]);
+                result = await mysql.query('select * ' + sql, params);
             }
         } else {
             let sql = `from collection
                        where dao_create_block > 0
                          and hidden = false
                          and chain_name like '%${chainName}%'`
+            let params = [];
             if (name) {
-                sql += ` and dao_name like '%${name}%'`;
+                sql += ` and dao_name like ?`;
+                params.push(`%${name}%`);
             }
-            total = await mysql.query('select count(*) ' + sql, chainName);
+            total = await mysql.query('select count(*) ' + sql, params);
             total = total[0]['count(*)'];
             sql += ' order by weight desc, proposal_num desc, collection_id';
             if (offset && limit) {
@@ -316,7 +299,7 @@ class DAOService extends Service {
             } else if (limit) {
                 sql += ' limit ' + limit;
             }
-            result = await mysql.query('select * ' + sql, chainName);
+            result = await mysql.query('select * ' + sql, params);
         }
         const data = [];
         for (const item of result) {
@@ -351,11 +334,13 @@ class DAOService extends Service {
                          and hidden = false
                          and chain_name like '%${chainName}%'
                          and collection_id in (?)`;
+        let params = [collections];
         if (name) {
-            sql += ` and dao_name like '%${name}%'`;
+            sql += ` and dao_name like ?`;
+            params.push(`%${name}%`);
         }
         const mysql = this.app.mysql.get('chainData');
-        let totalQuery = await mysql.query('select count(*) as total ' + sql, [collections]);
+        let totalQuery = await mysql.query('select count(*) as total ' + sql, params);
         total = totalQuery[0].total;
         sql += ' order by weight desc, proposal_num desc, collection_id';
         if (offset && limit) {
@@ -363,7 +348,7 @@ class DAOService extends Service {
         } else if (limit) {
             sql += ' limit ' + limit;
         }
-        result = await mysql.query('select * ' + sql, [collections]);
+        result = await mysql.query('select * ' + sql, params);
         return [total, result];
     }
 
@@ -405,9 +390,11 @@ class DAOService extends Service {
                         , (start_time / 1000 <= UNIX_TIMESTAMP() and end_time / 1000 > UNIX_TIMESTAMP()) actived
                         , (start_time / 1000 > UNIX_TIMESTAMP())                                         pending
                    from proposal`;
+        let params = [];
         if (collection_id) {
-            sql += ` where collection_id='${collection_id}'`;
-            totalSql += ` where collection_id='${collection_id}'`;
+            sql += ` where collection_id=?`;
+            totalSql += ` where collection_id=?`;
+            params.push(collection_id);
         }
         sql += ' order by update_time desc, actived desc, pending desc, end_time asc';
         if (offset && limit) {
@@ -415,14 +402,14 @@ class DAOService extends Service {
         } else if (limit) {
             sql += ' limit ' + limit;
         }
-        const temp = await mysql.query(sql);
-        let total = await mysql.query(totalSql);
+        const temp = await mysql.query(sql, params);
+        let total = await mysql.query(totalSql, params);
         total = total[0]['count(*)'];
         const results = [];
         for (const r of temp) {
             // TODO: if votes is too big, there will lost some decimals
             const sql = 'select item,sum(votes) as total_votes from voter where collection_id=? and id=? group by item';
-            const voteNumResult = await mysql.query(sql, [collection_id, r.id]);
+            const voteNumResult = await mysql.query(sql, [collection_id ? collection_id : "", r.id]);
             const items = this.split(r.items, '|');
             if (voteNumResult.length === 0) {
                 r.results = items.map((item) => 0);
@@ -458,8 +445,8 @@ class DAOService extends Service {
         } else if (limit) {
             sql += ' limit ' + limit;
         }
-        const temp = await mysql.query(sql, collection_id);
-        let total = await mysql.query(totalSql, collection_id);
+        const temp = await mysql.query(sql, [collection_id]);
+        let total = await mysql.query(totalSql, [collection_id]);
         total = total[0]['count(*)'];
         const results = [];
         for (const r of temp) {
@@ -489,7 +476,7 @@ class DAOService extends Service {
                          where collection_id = ?
                            and end_time / 1000 < unix_timestamp()
                            and ballot_threshold <= voters.num;`
-        let passedRes = await mysql.query(passedSql, collection_id);
+        let passedRes = await mysql.query(passedSql, [collection_id]);
         let failedSql = `select count(*) as failed
                          from proposal
                                   left join (select id, count(*) as num from voter group by id) as voters
@@ -497,7 +484,7 @@ class DAOService extends Service {
                          where collection_id = ?
                            and end_time / 1000 < unix_timestamp()
                            and ballot_threshold > voters.num;`
-        let failedRes = await mysql.query(failedSql, collection_id);
+        let failedRes = await mysql.query(failedSql, [collection_id]);
         let activedSql = `select count(*) as actived
                           from proposal
                                    left join (select id, count(*) as num from voter group by id) as voters
@@ -505,14 +492,14 @@ class DAOService extends Service {
                           where collection_id = ?
                             and proposal.start_time / 1000 <= unix_timestamp()
                             and unix_timestamp() <= proposal.end_time / 1000;`
-        let activedRes = await mysql.query(activedSql, collection_id);
+        let activedRes = await mysql.query(activedSql, [collection_id]);
         let pendingSql = `select count(*) as pending
                           from proposal
                                    left join (select id, count(*) as num from voter group by id) as voters
                                              on proposal.id = voters.id
                           where collection_id = ?
                             and proposal.start_time / 1000 > unix_timestamp();`
-        let pendingRes = await mysql.query(pendingSql, collection_id);
+        let pendingRes = await mysql.query(pendingSql, [collection_id]);
         return {
             total: total, passed: passedRes[0].passed, failed: failedRes[0].failed, actived: activedRes[0].actived,
             pending: pendingRes[0].pending, data: results
@@ -574,7 +561,6 @@ class DAOService extends Service {
         const hash = crypto.createHash('md5');
         hash.update(collection_id + title + description);
         const proposalId = hash.digest('hex');
-        console.log(proposalId, collection_id, title, description);
         await this.app.mysql.get('app').insert('proposal', {
             collection_id,
             id: proposalId,
@@ -641,28 +627,33 @@ class DAOService extends Service {
         if (votes === 0) {
             throw new Error('no voting power');
         }
-        // record vote
-        await this.app.mysql.get('app').insert('voter', {
-            collection_id: collectionId,
-            id: proposalId,
-            voter,
-            item,
-            votes
-        });
+        const mysql = await this.app.mysql.get('app');
+        const conn = await mysql.beginTransaction();
         try {
+            // record vote
+            await conn.insert('voter', {
+                collection_id: collectionId,
+                id: proposalId,
+                voter,
+                item,
+                votes
+            });
             // update proposal update time
-            await this.app.mysql.get('app').update('proposal', {
+            await conn.update('proposal', {
                 update_time: Date.now()
             }, {where: {collection_id: collectionId, id: proposalId}});
             // record used nft
             for (const voteId of shouldRecordNFTs) {
                 let tableName = isFlowNetwork(chainName) ? "flow_voter_records" : "ton_voter_records";
-                await this.app.mysql.get('app').insert(tableName, {
+                await conn.insert(tableName, {
                     proposal_id: proposalId, token_id: voteId
                 });
             }
+            await conn.commit();
         } catch (e) {
-            this.logger.error('update proposal active time', e);
+            await conn.rollback();
+            this.logger.error(e);
+            throw e;
         }
     }
 
