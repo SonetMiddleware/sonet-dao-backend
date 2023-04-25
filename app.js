@@ -23,6 +23,11 @@ module.exports = app => {
             }
         }
     })
+    app.validator.addRule('tonAddress', (rule, value) => {
+        if (!isTONAddr(value)) {
+            return false;
+        }
+    })
     app.validator.addRule('chainName', (rule, value) => {
         if (value !== constant.CHAIN_NAME_MUMBAI && value !== constant.CHAIN_NAME_POLYGON &&
             value !== constant.CHAIN_NAME_RINKEBY && value !== constant.CHAIN_NAME_MAINNET &&

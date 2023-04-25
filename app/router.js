@@ -19,6 +19,7 @@ module.exports = app => {
     router.post('/api/v1/proposal/create', controller.dao.createProposal);
     router.post('/api/v1/proposal/vote', controller.dao.vote);
     router.post('/api/v1/twitter-nft/add', controller.socialMedia.addTwitterNFT);
+    router.post('/api/v1/ton/launchpad/create', controller.socialMedia.recordLaunchpad);
     router.post('/api/v1/dao/tg/create', controller.dao.createTGDao);
 
     router.get('/api/v1/favorite', controller.nft.queryFavorite);
@@ -49,6 +50,7 @@ module.exports = app => {
     router.get('/api/v1/tg/message/:group_id', controller.socialMedia.queryTGGroupMsgStatus);
     router.get('/api/v1/tg/message/:group_id/:message_id', controller.socialMedia.queryTGStatus);
     router.get('/api/v1/tg/raw-message', controller.socialMedia.queryTGRawMsg);
+    router.get('/api/v1/ton/launchpad/list', controller.socialMedia.queryLaunchpad);
     router.get('/api/v1/statistic', controller.statistic.getData);
 
     router.get('/assets/erc-1155/:contracts/:token_id', controller.assetsERC1155.getURIAssets);

@@ -480,6 +480,78 @@ returns:
 }
 ```
 
+### Record Launchpad Info
+
+method: POST
+
+URL: /api/v1/ton/launchpad/create
+
+Parameters:
+
+```json
+{
+  "group_id": "tg group id",
+  "is_mainnet": false,
+  "address": "deployed launchpad address",
+  "start_time": 1681973200,
+  "duration": 86400,
+  "ex_rate": 2000000,
+  "source_jetton": "Jetton Address or empty",
+  "sold_jetton": "Sold Jetton Address",
+  "cap": 1000000000,
+  "owner": "launchpad owner address"
+}
+```
+
+returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": null
+}
+```
+
+### Query Launchpad Info List
+
+method: GET
+
+URL: /api/v1/ton/launchpad/list?group_id=xxx&is_mainnet=xxx&order_mode=xxx&page=xxx&gap=xxx
+
+> group_id and is_mainnet are required, `is_mainnet` is defined as TRUE as long as it has a value
+>
+> order_mode must be 1 or 2, default mode is 1
+>
+> order mode 1: order by start_time desc
+>
+> order mode 2: order by start_time desc, start_time+duration<now() desc, early start time first, not ended first
+
+Parameters:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 1000,
+    "data": [
+      {
+        "address": "deployed launchpad address",
+        "start_time": 1681973200,
+        "duration": 86400,
+        "ex_rate": 2000000,
+        "source_jetton": "Jetton Address or empty",
+        "sold_jetton": "Sold Jetton Address",
+        "cap": 1000000000,
+        "owner": "launchpad owner address",
+        "ended": 1
+      }
+    ]
+  }
+}
+```
+
 ## Invitation code
 
 ### Generate invitation code

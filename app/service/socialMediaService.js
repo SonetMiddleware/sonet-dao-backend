@@ -362,7 +362,7 @@ class SocialMediaService extends Service {
         return data;
     }
 
-    async queryTGRawMsg(group_id, message_id,type,data, limit, offset) {
+    async queryTGRawMsg(group_id, message_id, type, data, limit, offset) {
         let sql = `select count(*) as total
                    from tg_msg
                    where group_id = ?`;
@@ -396,6 +396,41 @@ class SocialMediaService extends Service {
             condition.offset = offset;
         }
         return {total: total[0].total, data: await this.app.mysql.get('app').select(`tg_msg`, condition)};
+    }
+
+    async recordLaunchpad(params) {
+        try {
+            await this.app.mysql.get('app').insert(`ton_launchpad`, params);
+        } catch (e) {
+            this.app.logger.error('insert new launchpad, ', e);
+            throw new Error('insert failed');
+        }
+    }
+
+    async queryLaunchpad(groupId, isMainnet, orderMode, limit, offset) {
+        let total = await this.app.mysql.get('app').query(`select count(*) as total
+                                                           from ton_launchpad
+                                                           where group_id = ?
+                                                             and is_mainnet = ?`, [groupId, isMainnet]);
+        if (!total || total[0].total === 0) {
+            return {total: 0, data: []};
+        }
+        total = total[0].total;
+        let sql = `select *, start_time + ton_launchpad.duration < UNIX_TIMESTAMP() as ended
+                   from ton_launchpad
+                   where group_id = ?
+                     and is_mainnet = ?
+                   order by start_time desc `;
+        if (orderMode === "2") {
+            sql += ', ended';
+        }
+        if (offset && limit) {
+            sql += ' limit ' + offset + ', ' + limit
+        } else if (limit) {
+            sql += ' limit ' + limit;
+        }
+        let res = await this.app.mysql.get('app').query(sql, [groupId, isMainnet]);
+        return {total: total, data: res};
     }
 }
 

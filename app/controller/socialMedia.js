@@ -5,7 +5,7 @@ const web3 = new Web3();
 const constant = require('../utils/constant');
 const utils = require("../utils/utils");
 const {isFlowNetwork, verifyFlowSig, isTONNetwork, verifyTonSig, verifyTGRobot} = require("../utils/utils");
-const {checkMsgAction, RESP_CODE_ILLEGAL_PARAM} = require("../utils/constant");
+const {checkMsgAction, RESP_CODE_ILLEGAL_PARAM, RESP_CODE_ILLEGAL_SIG} = require("../utils/constant");
 
 class SocialMediaController extends Controller {
     async bindAddr() {
@@ -351,6 +351,43 @@ class SocialMediaController extends Controller {
         const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
         ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTGRawMsg(param.group_id,
             param.message_id, param.type, param.data, limit, offset))
+    }
+
+    async recordLaunchpad() {
+        const {ctx} = this;
+        let param = ctx.request.body;
+        ctx.validate({
+            address: 'tonAddress',
+            sold_jetton: 'tonAddress',
+            owner: 'tonAddress',
+        }, param);
+        if (param.source_jetton) {
+            ctx.validate({
+                source_jetton: 'tonAddress'
+            }, param);
+        }
+        if (!verifyTGRobot(ctx.request)) {
+            ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "illegal param: sig");
+            return;
+        }
+        try {
+            await this.ctx.service.socialMediaService.recordLaunchpad(param);
+            this.ctx.body = data.newNormalResp({})
+        } catch (e) {
+            this.ctx.body = data.newResp(constant.RESP_CODE_NORMAL_ERROR, e.toString(), {});
+        }
+    }
+
+    async queryLaunchpad(){
+        const {ctx} = this;
+        let param = ctx.request.query;
+        if (!param.group_id || !param.is_mainnet) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: group_id or is_mainnet", {})
+            return;
+        }
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryLaunchpad(param.group_id,
+            !param.is_mainnet, param.order_mode, limit, offset))
     }
 }
 
