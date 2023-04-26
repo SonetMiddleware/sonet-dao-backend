@@ -18,6 +18,7 @@ const {
 const {sha256} = require("js-sha256");
 const {uploadFileToIPFS} = require("../utils/ipfs");
 const crypto = require('crypto');
+const {Address} = require("tonweb");
 
 class DAOService extends Service {
 
@@ -158,7 +159,10 @@ class DAOService extends Service {
         };
         if (contractMap && isTONNetwork(contractMap.chain_name)) {
             const createdCollection = await this.app.mysql.get('app').get('ton_collection_metadata',
-                {is_mainnet: contractMap.chain_name === CHAIN_NAME_TON_MAINNET, addr: contractMap.contract});
+                {
+                    is_mainnet: contractMap.chain_name === CHAIN_NAME_TON_MAINNET,
+                    addr: new Address(contractMap.contract).toString(true, true, false)
+                });
             if (createdCollection) {
                 data.enable_other_mint = createdCollection.enable_other_mint;
             } else {
