@@ -9,7 +9,7 @@ const {
     VOTER_TYPE_PER_ADDR,
     VOTER_TYPE_PER_NFT,
     VOTER_TYPE_OTHER_TOKEN,
-    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET, CFG_HIDDEN_0_PROPOSAL_DAO
+    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET, CFG_HIDDEN_0_PROPOSAL_DAO, CHAIN_NAME_TON_MAINNET
 } = require("../utils/constant");
 const {
     getFlowNFTs, isFlowNetwork, getFlowNFTIdsOfAccount, getNFTKinds, isTONNetwork,
@@ -142,7 +142,7 @@ class DAOService extends Service {
             return {};
         }
         const contractMap = await this.app.mysql.get('chainData').get('collection_map', {collection_id: collectionId});
-        return {
+        const data = {
             chain_name: this.split(collection.chain_name, ","),
             id: collection.collection_id,
             name: collection.collection_name,
@@ -156,6 +156,16 @@ class DAOService extends Service {
             } : null,
             contract: contractMap === undefined ? "" : contractMap.contract
         };
+        if (contractMap && isTONNetwork(contractMap.chain_name)) {
+            const createdCollection = await this.app.mysql.get('app').get('ton_collection_metadata',
+                {is_mainnet: contractMap.chain_name === CHAIN_NAME_TON_MAINNET, addr: contractMap.contract});
+            if (createdCollection) {
+                data.enable_other_mint = createdCollection.enable_other_mint;
+            } else {
+                data.enable_other_mint = false;
+            }
+        }
+        return data;
     }
 
     async queryCollectionByNFT(contract) {

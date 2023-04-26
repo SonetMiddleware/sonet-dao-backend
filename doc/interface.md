@@ -1210,7 +1210,9 @@ Returns:
       "total_member": "2/200",
       "facebook": "",
       "twitter": ""
-    }
+    },
+    "contract": "contract address",
+    "enable_other_mint": "bool value, anyone could mint nft item, only active at TON"
   }
 }
 ```
