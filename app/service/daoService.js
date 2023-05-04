@@ -155,7 +155,7 @@ class DAOService extends Service {
                 facebook: collection.facebook,
                 twitter: collection.twitter
             } : null,
-            contract: contractMap === undefined ? "" : contractMap.contract
+            contract: !contractMap ? "" : contractMap.contract
         };
         if (contractMap && isTONNetwork(contractMap.chain_name)) {
             const createdCollection = await this.app.mysql.get('app').get('ton_collection_metadata',
