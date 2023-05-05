@@ -4,7 +4,7 @@ const Web3 = require('web3');
 const web3 = new Web3();
 const constant = require('../utils/constant');
 const utils = require("../utils/utils");
-const {isFlowContract, isFlowAddr} = require("../utils/utils");
+const {isFlowContract, isFlowAddr, verifyTGRobot} = require("../utils/utils");
 const {sha256} = require("js-sha256");
 const {uploadStreamToIPFS} = require("../utils/ipfs");
 const {v4: uuidv4} = require('uuid');
@@ -124,6 +124,10 @@ class NFTController extends Controller {
 
     async uploadFileToIPFS() {
         const {ctx} = this;
+        if (!verifyTGRobot(ctx.request)) {
+            ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "illegal param: sig");
+            return;
+        }
         const files = ctx.request.files;
         if (!files || files.length > 9) {
             ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, 'too many files', {})
