@@ -21,6 +21,7 @@ module.exports = app => {
     router.post('/api/v1/twitter-nft/add', controller.socialMedia.addTwitterNFT);
     router.post('/api/v1/ton/launchpad/create', controller.socialMedia.recordLaunchpad);
     router.post('/api/v1/dao/tg/create', controller.dao.createTGDao);
+    router.post('/api/v1/ton/campaign/complete-task', controller.socialMedia.recordUserTaskAtCampaign);
 
     router.get('/api/v1/favorite', controller.nft.queryFavorite);
     router.get('/api/v1/bind-attr', controller.socialMedia.bindAttr);
@@ -51,6 +52,9 @@ module.exports = app => {
     router.get('/api/v1/tg/message/:group_id/:message_id', controller.socialMedia.queryTGStatus);
     router.get('/api/v1/tg/raw-message', controller.socialMedia.queryTGRawMsg);
     router.get('/api/v1/ton/launchpad/list', controller.socialMedia.queryLaunchpad);
+    router.get('/api/v1/ton/campaigns', controller.socialMedia.queryTonCampaign);
+    router.get('/api/v1/ton/campaign/tasks', controller.socialMedia.queryTonCampaignTasks);
+    router.get('/api/v1/ton/campaign/completed-tasks', controller.socialMedia.queryTonUserCampaignTasks);
     router.get('/api/v1/statistic', controller.statistic.getData);
 
     router.get('/assets/erc-1155/:contracts/:token_id', controller.assetsERC1155.getURIAssets);

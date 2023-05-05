@@ -552,6 +552,119 @@ Parameters:
 }
 ```
 
+### Query TG Campaign Info List
+
+method: GET
+
+URL: /api/v1/ton/campaigns?collection_id=xxx&is_mainnet=xxx&page=xxx&gap=xxx
+
+> collection_id is required, `is_mainnet` is defined as TRUE as long as it has a value
+
+Parameters:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 1000,
+    "data": [
+      {
+        "campaign_id": "campaign id",
+        "title": "campaign title",
+        "description": "campaign description",
+        "image_url": "url of campaign image",
+        "rewards": "rewards text",
+        "rewards_url": "rewards url, maybe empty"
+      }
+    ]
+  }
+}
+```
+
+### Query TG Group Task List
+
+method: GET
+
+URL: /api/v1/ton/campaign/tasks?campaign_id=xxx&page=xxx&gap=xxx
+
+> campaign_id is required
+
+Parameters:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 1000,
+    "data": [
+      {
+        "task_id": 123,
+        "task": "task text",
+        "task_type": 1,
+        "target": "target tg or collection_id",
+        "score": 100
+      }
+    ]
+  }
+}
+```
+
+> task_type 1: open tg group, 2: open dao page, 3: join tg group
+
+### Query User Completed Tasks
+
+method: GET
+
+URL: /api/v1/ton/campaign/completed-tasks?campaign_id=xxx&address=xxx&page=xxx&gap=xxx
+
+> campaign_id and address are required
+
+Parameters:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": [
+    123,
+    124,
+    126
+  ]
+}
+```
+
+> return completed task ids by user
+
+### Record User Completed Task
+
+method: POST
+
+URL: /api/v1/ton/campaign/complete-task
+
+> require TG Robot Auth Header
+
+Parameters:
+
+```json
+{
+  "address": "user address",
+  "campaign_id": "xxxxx",
+  "task_id": 123
+}
+```
+
+returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
 ## Invitation code
 
 ### Generate invitation code

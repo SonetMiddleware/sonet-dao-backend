@@ -378,7 +378,7 @@ class SocialMediaController extends Controller {
         }
     }
 
-    async queryLaunchpad(){
+    async queryLaunchpad() {
         const {ctx} = this;
         let param = ctx.request.query;
         if (!param.group_id || !param.is_mainnet) {
@@ -388,6 +388,67 @@ class SocialMediaController extends Controller {
         const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
         ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryLaunchpad(param.group_id,
             !param.is_mainnet, param.order_mode, limit, offset))
+    }
+
+    async queryTonCampaign() {
+        const {ctx} = this;
+        let param = ctx.request.query;
+        if (!param.collection_id) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: collection_id", {})
+            return;
+        }
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTonCampaign(param.collection_id,
+            !param.is_mainnet, limit, offset))
+    }
+
+    async queryTonCampaignTasks() {
+        const {ctx} = this;
+        let param = ctx.request.query;
+        if (!param.campaign_id) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: campaign_id", {})
+            return;
+        }
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTonCampaignTasks(param.campaign_id,
+            limit, offset))
+    }
+
+    async queryTonUserCampaignTasks() {
+        const {ctx} = this;
+        let param = ctx.request.query;
+        if (!param.campaign_id) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: campaign_id", {})
+            return;
+        }
+        ctx.validate({
+            address: 'tonAddress',
+        }, param);
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTonUserCampaignTasks(
+            param.address, param.campaign_id, limit, offset))
+    }
+
+    async recordUserTaskAtCampaign() {
+        const {ctx} = this;
+        let param = ctx.request.body;
+        ctx.validate({
+            address: 'tonAddress',
+        }, param);
+        if (!param.campaign_id) {
+            ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: campaign_id", {})
+            return;
+        }
+        if (!verifyTGRobot(ctx.request)) {
+            ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "illegal param: sig");
+            return;
+        }
+        try {
+            await this.ctx.service.socialMediaService.recordUserTaskAtCampaign(param.address, param.campaign_id, param.task_id);
+            this.ctx.body = data.newNormalResp({})
+        } catch (e) {
+            this.ctx.body = data.newResp(constant.RESP_CODE_NORMAL_ERROR, e.toString(), {});
+        }
     }
 }
 

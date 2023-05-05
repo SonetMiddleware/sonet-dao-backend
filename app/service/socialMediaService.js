@@ -432,6 +432,43 @@ class SocialMediaService extends Service {
         let res = await this.app.mysql.get('app').query(sql, [groupId, isMainnet]);
         return {total: total, data: res};
     }
+
+    async queryTonCampaign(collection_id, is_mainnet, limit, offset) {
+        return this.app.mysql.get('app').select(`ton_campaign`, {
+            where: {collection_id: collection_id, is_mainnet: is_mainnet},
+            columns: ['campaign_id', 'title', 'description', 'image_url', 'rewards', 'rewards_url'],
+            limit: limit,
+            offset: offset,
+            orders: [['create_time', 'desc']],
+        });
+    }
+
+    async queryTonCampaignTasks(campaign_id, limit, offset) {
+        return this.app.mysql.get('app').select(`ton_campaign_tasks`, {
+            where: {campaign_id: campaign_id},
+            columns: ['task_id', 'task', 'task_type', 'target', 'score'],
+            limit: limit,
+            offset: offset,
+        });
+    }
+
+    async queryTonUserCampaignTasks(address, campaign_id) {
+        const tasks = await this.app.mysql.get('app').select(`ton_user_completed_tasks`, {
+            where: {
+                address: address,
+                campaign_id: campaign_id,
+            }
+        })
+        if (!tasks) {
+            return [];
+        }
+        return tasks.map(item => item.task_id);
+    }
+
+    async recordUserTaskAtCampaign(address, campaign_id, task_id) {
+        await this.app.mysql.get('app').query(`replace into ton_user_completed_tasks
+                                               values (?, ?, ?)`, [address, campaign_id, task_id]);
+    }
 }
 
 module.exports = SocialMediaService;
