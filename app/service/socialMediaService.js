@@ -434,22 +434,49 @@ class SocialMediaService extends Service {
     }
 
     async queryTonCampaign(collection_id, is_mainnet, limit, offset) {
-        return this.app.mysql.get('app').select(`ton_campaign`, {
-            where: {collection_id: collection_id, is_mainnet: is_mainnet},
-            columns: ['campaign_id', 'title', 'description', 'image_url', 'rewards', 'rewards_url'],
+        let isMainnet = !is_mainnet ? 0 : 1;
+        const total = await this.app.mysql.get('app').query(`select count(*) as total
+                                                             from ton_campaign
+                                                             where collection_id = ?
+                                                               and is_mainnet = ?`, [collection_id, isMainnet]);
+        if (!total || total.length === 0 || total[0].total === 0) {
+            return {total: 0, data: []};
+        }
+        const data = await this.app.mysql.get('app').select(`ton_campaign`, {
+            where: {collection_id: collection_id, is_mainnet: isMainnet},
+            columns: ['campaign_id', 'title', 'description', 'image_url', 'rewards', 'rewards_url', 'start_time', 'end_time'],
             limit: limit,
             offset: offset,
-            orders: [['create_time', 'desc']],
+            orders: [['start_time', 'asc'], ['end_time', 'desc']],
         });
+        return {total: total[0].total, data: data};
     }
 
-    async queryTonCampaignTasks(campaign_id, limit, offset) {
-        return this.app.mysql.get('app').select(`ton_campaign_tasks`, {
+    async queryTonCampaignTasks(campaign_id, address, limit, offset) {
+        const total = await this.app.mysql.get('app').query(`select count(*) as total
+                                                             from ton_campaign_tasks
+                                                             where campaign_id = ?`, [campaign_id]);
+        if (!total || total.length === 0 || total[0].total === 0) {
+            return {total: 0, data: []};
+        }
+        const data = await this.app.mysql.get('app').select(`ton_campaign_tasks`, {
             where: {campaign_id: campaign_id},
             columns: ['task_id', 'task', 'task_type', 'target', 'score'],
             limit: limit,
             offset: offset,
         });
+        if (address) {
+            const userCompleted = await this.queryTonUserCampaignTasks(address, campaign_id);
+            for (const completedId of userCompleted) {
+                for (const item of data) {
+                    if (item.task_id === completedId) {
+                        item.completed_by_addr = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return {total: total[0].total, data: data};
     }
 
     async queryTonUserCampaignTasks(address, campaign_id) {

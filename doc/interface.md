@@ -575,7 +575,9 @@ Parameters:
         "description": "campaign description",
         "image_url": "url of campaign image",
         "rewards": "rewards text",
-        "rewards_url": "rewards url, maybe empty"
+        "rewards_url": "rewards url, maybe empty",
+        "start_time": 1111111,
+        "end_time": 2222222
       }
     ]
   }
@@ -586,9 +588,9 @@ Parameters:
 
 method: GET
 
-URL: /api/v1/ton/campaign/tasks?campaign_id=xxx&page=xxx&gap=xxx
+URL: /api/v1/ton/campaign/tasks?campaign_id=xxx&address=xxx&page=xxx&gap=xxx
 
-> campaign_id is required
+> campaign_id is required, address is optional
 
 Parameters:
 
@@ -604,14 +606,15 @@ Parameters:
         "task": "task text",
         "task_type": 1,
         "target": "target tg or collection_id",
-        "score": 100
+        "score": 100,
+        "completed_by_addr": false
       }
     ]
   }
 }
 ```
 
-> task_type 1: open tg group, 2: open dao page, 3: join tg group
+> task_type 1: open tg group, 2: open dao page, 3: join tg group, or other defined type
 
 ### Query User Completed Tasks
 

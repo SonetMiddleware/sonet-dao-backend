@@ -8,7 +8,8 @@ create table ton_campaign
     image_url     tinytext    not null,
     rewards       varchar(64) not null,
     rewards_url   tinytext    not null,
-    create_time   bigint      not null,
+    start_time    bigint      not null,
+    end_time      bigint      not null,
     primary key (collection_id, campaign_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;

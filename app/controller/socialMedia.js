@@ -399,7 +399,7 @@ class SocialMediaController extends Controller {
         }
         const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
         ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTonCampaign(param.collection_id,
-            !param.is_mainnet, limit, offset))
+            param.is_mainnet, limit, offset))
     }
 
     async queryTonCampaignTasks() {
@@ -409,9 +409,14 @@ class SocialMediaController extends Controller {
             ctx.body = data.newResp(RESP_CODE_ILLEGAL_PARAM, "ill param: campaign_id", {})
             return;
         }
+        if (param.address) {
+            ctx.validate({
+                address: 'tonAddress',
+            }, param);
+        }
         const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
         ctx.body = data.newNormalResp(await this.ctx.service.socialMediaService.queryTonCampaignTasks(param.campaign_id,
-            limit, offset))
+            param.address, limit, offset))
     }
 
     async queryTonUserCampaignTasks() {
