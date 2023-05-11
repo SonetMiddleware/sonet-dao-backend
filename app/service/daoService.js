@@ -13,7 +13,8 @@ const {
 } = require("../utils/constant");
 const {
     getFlowNFTs, isFlowNetwork, getFlowNFTIdsOfAccount, getNFTKinds, isTONNetwork,
-    getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT, createDaoAtTon
+    getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT, createDaoAtTon,
+    tonUserOwnedCollectionsNFT
 } = require("../utils/utils");
 const {sha256} = require("js-sha256");
 const {uploadFileToIPFS} = require("../utils/ipfs");
@@ -376,13 +377,7 @@ class DAOService extends Service {
         if (isFlowNetwork(chainName)) {
             return await getNFTKinds(chainName, addr, collectionIdToContractMap);
         } else if (isTONNetwork(chainName)) {
-            const result = [];
-            for (const item of items) {
-                if (await tonUserOwnedCollectionNFT(chainName, addr, item.contract)) {
-                    result.push(item.collection_id);
-                }
-            }
-            return result;
+            return await tonUserOwnedCollectionsNFT(chainName, addr, collectionIdToContractMap);
         }
     }
 

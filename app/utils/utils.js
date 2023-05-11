@@ -403,6 +403,35 @@ async function tonUserOwnedCollectionNFT(chainName, owner, collectionAddr) {
     return Array.isArray(nftItems) && nftItems.length > 0;
 }
 
+async function tonUserOwnedCollectionsNFT(chainName, owner, collectionIdToAddrMap) {
+    let offset = 0, limit = 1000;
+    const filter = new Map();
+    for (; ;) {
+        const nftItems = await searchTonNFT(chainName, {
+            limit: limit,
+            offset: offset,
+            owner: owner,
+            include_on_sale: true,
+        })
+        if (Array.isArray(nftItems) && nftItems.length > 0) {
+            for (const item of nftItems) {
+                filter.set(item.collection.address, true);
+            }
+            offset += 1000;
+        } else {
+            break;
+        }
+    }
+    const result = [];
+    for (const collectionId in collectionIdToAddrMap) {
+        if (filter.get(Address.parse(collectionIdToAddrMap[collectionId]).toRawString())) {
+            result.push(collectionId)
+        }
+    }
+
+    return result;
+}
+
 async function getTONNFTs(chainName, owner, collectionAddr, limit, offset) {
     // show 10000000 NFTs maximum
     const nftItems = await searchTonNFT(chainName, {
@@ -570,6 +599,6 @@ module.exports = {
     isFlowNetwork,
     verifyFlowSig,
 
-    getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT,
+    getTONNFTs, getTonBalance, getTonCollectionNFTs, tonUserOwnedCollectionNFT,tonUserOwnedCollectionsNFT,
     isTONAddr, isTONNetwork, verifyTonSig, verifyTGRobot, createTONNFTItemMintBody, createDaoAtTon, isCollectionDeployed
 }
