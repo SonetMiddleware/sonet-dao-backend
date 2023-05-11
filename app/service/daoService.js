@@ -219,6 +219,7 @@ class DAOService extends Service {
                 result = await getFlowNFTs(chain_name, addr, catalogToContractMap, limit, offset);
             } else if (isTONNetwork(chain_name)) {
                 for (const item of items) {
+                    // TODO: optimize this: query collection next tokenIndex as total, search collection with limit&offset straightly
                     let nfts = addr !== undefined ? await getTONNFTs(chain_name, addr, item.contract, limit, offset) :
                         await getTonCollectionNFTs(chain_name, item.contract, limit, offset);
                     result.total += nfts.total;
@@ -689,6 +690,7 @@ class DAOService extends Service {
         } else {
             const items = await this.app.mysql.get('chainData').select('collection_map', {where: {collection_id: collectionId}});
             for (const item of items) {
+                // TODO: optimize this: query collection next tokenIndex as total, search collection with limit&offset straightly
                 let nfts = await getTONNFTs(chainName, voter, item.contract);
                 collectionNFTIds.push(...nfts.data.map(item => item.token_id));
             }
