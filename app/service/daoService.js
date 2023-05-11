@@ -339,7 +339,7 @@ class DAOService extends Service {
         return {"total": total, data: data};
     }
 
-    async queryFlowAndTonDaoList(chainName, addr, name, hidden0ProposalDao, limit, offset) {
+    async queryFlowAndTonDaoList(chainName, addr, name, limit, offset) {
         let total = 0, result = [];
         let collections = await this.getTONAndFlowUserAllCollectionIds(chainName, addr);
         if (collections.length === 0) {
