@@ -131,7 +131,8 @@ class DAOService extends Service {
                     start_date: item.start_date,
                     total_member: item.total_member,
                     facebook: item.facebook,
-                    twitter: item.twitter
+                    twitter: item.twitter,
+                    centralized: item.centralized,
                 } : null
             };
         });
@@ -154,7 +155,8 @@ class DAOService extends Service {
                 start_date: collection.start_date,
                 total_member: collection.total_member,
                 facebook: collection.facebook,
-                twitter: collection.twitter
+                twitter: collection.twitter,
+                centralized: collection.centralized,
             } : null,
             contract: !contractMap ? "" : contractMap.contract
         };
@@ -188,7 +190,8 @@ class DAOService extends Service {
                 start_date: collection.start_date,
                 total_member: collection.total_member,
                 facebook: collection.facebook,
-                twitter: collection.twitter
+                twitter: collection.twitter,
+                centralized: collection.centralized,
             } : null
         };
     }
