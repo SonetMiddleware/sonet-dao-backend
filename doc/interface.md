@@ -1529,12 +1529,44 @@ returns:
       {
         "voter": "voter address",
         "item": "proposal item",
-        "num": "num of votes"
+        "num": "num of votes",
+        "comment": "",
+        "vote_time": 1231231231313
       }
     ]
   }
 }
 ```
+
+> comment maybe empty
+>
+> order by vote time desc
+
+### Get Votes Comments List
+
+Method: GET
+
+URL: /api/v1/votes/comments?proposal_id=xxxx&collection_id=xxx
+
+returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 10000,
+    "data": [
+      {
+        "comment": "",
+        "vote_time": 1231231231313
+      }
+    ]
+  }
+}
+```
+
+> order by vote time desc
 
 ### Check if a user has voted for a proposal
 
@@ -1602,9 +1634,7 @@ Parameters:
 > msg).then(res=>{ console.log(JSON.stringify(res)); })
 >
 > The result of the sig is like: "\[{"f_type":"CompositeSignature","f_vsn":"1.0.0","addr":"0x5f27f57d592aa038","keyId":
-> 1,"signature":"
->
-469dcd5d893c970c2323ac5c1790f1b49b18ce92c18969749d927b76812fa81370e6561f022f95d9677dfb07c1a67ee7cc30bd519086f6098ff25dbcf7575519"}\]"
+> 1,"signature":"xxxxxxxxxxxxxxxxxxxxxxxxx"}\]"
 
 Return:
 
@@ -1635,6 +1665,7 @@ Params:
   "collection_id": "",
   "proposal_id": "",
   "item": "approve", // select an item from the items array
+  "comment": "xxxxx",
   "sig": "xxxxxxx" // sign web3.utils.soliditySha3(proposal_id + item)
 }
 ```
@@ -1700,7 +1731,7 @@ Returns:
 }
 ```
 
-> `voter_typer` can only be 1 (one ballot per address) or 2 (one ballot per NFT)
+> `voter_typer` can only be 1 (one ballot per address owned NFT) or 2 (one ballot per NFT) or 6 (one ballot per address)
 >
 > If it is a 1155 NFT, the number of votes will be based on the number of 1155 NFTs owned by that address.
 >

@@ -8,8 +8,7 @@ const {
     getNodeUrl,
     VOTER_TYPE_PER_ADDR,
     VOTER_TYPE_PER_NFT,
-    VOTER_TYPE_OTHER_TOKEN,
-    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET, CFG_HIDDEN_0_PROPOSAL_DAO, CHAIN_NAME_TON_MAINNET
+    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET, CHAIN_NAME_TON_MAINNET, VOTER_TYPE_PER_OPEN_ADDR
 } = require("../utils/constant");
 const {
     getFlowNFTs, isFlowNetwork, getFlowNFTIdsOfAccount, getNFTKinds, isTONNetwork,
@@ -233,7 +232,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                    into nft_reg
+                         into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
         } else {
@@ -539,7 +538,18 @@ class DAOService extends Service {
             'select count(*) as total from voter where collection_id=? and id=?', [collectionId, proposalId]);
         const total = totalRes[0]["total"]
         const dataRes = await this.app.mysql.get('app').query(
-            'select voter, item, votes as num from voter where collection_id=? and id=?', [collectionId, proposalId]);
+            'select voter, item, votes as num, comment, vote_time from voter where collection_id=? and id=? order by vote_time desc',
+            [collectionId, proposalId]);
+        return {total: total, data: dataRes};
+    }
+
+    async queryVoteCommentsList(collectionId, proposalId) {
+        const totalRes = await this.app.mysql.get('app').query(
+            'select count(*) as total from voter where collection_id=? and id=? and comment is not null ', [collectionId, proposalId]);
+        const total = totalRes[0]["total"]
+        const dataRes = await this.app.mysql.get('app').query(
+            'select comment, vote_time from voter where collection_id=? and id=? and comment is not null order by vote_time desc',
+            [collectionId, proposalId]);
         return {total: total, data: dataRes};
     }
 
@@ -594,11 +604,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count (*) as proposal_num
-                     from ${appDataDBName}.proposal
-                     group by collection_id) p
-                 on c.collection_id = p.collection_id
-                     set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count(*) as proposal_num
+                                                from ${appDataDBName}.proposal
+                                                group by collection_id) p
+                    on c.collection_id = p.collection_id
+                 set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);
@@ -606,7 +616,7 @@ class DAOService extends Service {
         return proposalId;
     }
 
-    async vote(chainName, voter, collectionId, proposalId, item) {
+    async vote(chainName, voter, collectionId, proposalId, item, comment) {
         // check item
         const dbQuery = await this.app.mysql.get('app').select('proposal', {
             where: {collection_id: collectionId, id: proposalId},
@@ -630,7 +640,7 @@ class DAOService extends Service {
         const dao = await this.app.mysql.get('chainData').get('collection', {collection_id: collectionId});
         let votes = 1;
         let shouldRecordNFTs = [];
-        if (!dao.centralized) { // TODO: TODO: support FLOW and TON decentralized DAO
+        if (!dao.centralized) { // TODO: support FLOW and TON decentralized DAO
             votes = await this.getVotes(voter, chainName, collectionId, proposal.voter_type, proposal.snapshot_block);
         } else if (isFlowNetwork(chainName) || isTONNetwork(chainName)) {
             let usedVotes = await this.getFlowAndTonVotes(chainName, voter, proposal.voter_type, collectionId, proposalId);
@@ -649,7 +659,9 @@ class DAOService extends Service {
                 id: proposalId,
                 voter,
                 item,
-                votes
+                votes,
+                comment,
+                vote_time: Date.now()
             });
             // update proposal update time
             await conn.update('proposal', {
@@ -675,6 +687,9 @@ class DAOService extends Service {
             return {votes: 0, tokenIds: []};
         }
         voter_type = +voter_type;
+        if (voter_type === VOTER_TYPE_PER_OPEN_ADDR) {
+            return {votes: 1, tokenIds: []};
+        }
         if (voter_type === VOTER_TYPE_TONCOIN && isTONNetwork(chainName)) {
             return {votes: await getTonBalance(chainName, voter), tokenIds: []}
         }
@@ -739,6 +754,8 @@ class DAOService extends Service {
                 return 0;
             }
             votes = web3.utils.fromWei(balance, 'ether');
+        } else if (voter_type === constant.VOTER_TYPE_PER_OPEN_ADDR) {
+            return 1;
         } else {
             const balance = await this.nftBalance(chainName, voter, collectionId, snapshot_block);
             if ('' + balance === '0') {

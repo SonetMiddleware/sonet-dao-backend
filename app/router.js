@@ -44,6 +44,7 @@ module.exports = app => {
     router.get('/api/v1/proposal/permission', controller.dao.queryProposalPermission);
     router.get('/api/v1/proposal/votes', controller.dao.queryVotes);
     router.get('/api/v1/votes', controller.dao.queryVotesList);
+    router.get('/api/v1/votes/comments', controller.dao.queryVotesList);
     router.get('/api/v1/proposal/votes/num', controller.dao.getVotes);
     router.get('/api/v1/twitter-nft/counts', controller.socialMedia.getNFTTwitterCounts);
     router.get('/api/v1/twitter-nft/snapshots', controller.socialMedia.getNFTTwitterSnapshot);

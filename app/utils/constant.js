@@ -14,11 +14,12 @@ const RESP_CODE_ILLEGAL_SIG = 40001;
 
 const SOCIAL_MEDIAS = ["Twitter", "Facebook", "Instagram", "Telegram"];
 
-const VOTER_TYPE_PER_ADDR = 1; // one ballot per address
+const VOTER_TYPE_PER_ADDR = 1; // one ballot per address(owned NFT)
 const VOTER_TYPE_PER_NFT = 2; // one ballot per NFT
 const VOTER_TYPE_SON = 3; // one ballot per SON
 const VOTER_TYPE_OTHER_TOKEN = 4; // ballot for other tokens
 const VOTER_TYPE_TONCOIN = 5; // ballot per TON
+const VOTER_TYPE_PER_OPEN_ADDR = 6; // one ballot per address(anyone)
 
 const CHAIN_NAME_MAINNET = "mainnet";
 const CHAIN_NAME_POLYGON = "polygon";
@@ -93,6 +94,7 @@ module.exports = {
     VOTER_TYPE_SON,
     VOTER_TYPE_OTHER_TOKEN,
     VOTER_TYPE_TONCOIN,
+    VOTER_TYPE_PER_OPEN_ADDR,
 
     CHAIN_NAME_MAINNET,
     CHAIN_NAME_POLYGON,

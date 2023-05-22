@@ -14,9 +14,8 @@ const {
 } = require("../utils/utils");
 const {
     VOTER_TYPE_PER_NFT,
-    RESP_CODE_NORMAL_ERROR,
     VOTER_TYPE_PER_ADDR,
-    VOTER_TYPE_TONCOIN
+    VOTER_TYPE_TONCOIN, VOTER_TYPE_PER_OPEN_ADDR
 } = require("../utils/constant");
 const web3 = new Web3();
 
@@ -115,6 +114,12 @@ class DAOController extends Controller {
         ctx.body = data.newNormalResp(await ctx.service.daoService.queryVotesList(param.collection_id, param.proposal_id));
     }
 
+    async queryVoteCommentsList() {
+        const {ctx} = this;
+        let param = ctx.query;
+        ctx.body = data.newNormalResp(await ctx.service.daoService.queryVoteCommentsList(param.collection_id, param.proposal_id));
+    }
+
     async queryProposalPermission() {
         const {ctx} = this;
         let param = ctx.query;
@@ -153,7 +158,7 @@ class DAOController extends Controller {
         // check voter type
         const voterType = +param.voter_type;
         if (voterType !== constant.VOTER_TYPE_PER_ADDR && voterType !== constant.VOTER_TYPE_PER_NFT
-            && voterType !== constant.VOTER_TYPE_SON) {
+            && voterType !== constant.VOTER_TYPE_SON && voterType !== constant.VOTER_TYPE_TONCOIN && voterType !== constant.VOTER_TYPE_PER_OPEN_ADDR) {
             ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "illegal param: voter_type");
             return;
         }
@@ -223,7 +228,7 @@ class DAOController extends Controller {
         }
         try {
             await ctx.service.daoService.vote(param.chain_name, param.voter, param.collection_id, param.proposal_id,
-                param.item);
+                param.item, param.comment);
             ctx.body = data.newNormalResp({});
         } catch (e) {
             ctx.body = data.newResp(constant.RESP_CODE_NORMAL_ERROR, e.toString());
@@ -240,7 +245,7 @@ class DAOController extends Controller {
             chain_name: 'chainName'
         }, param);
         if (+param.voter_type !== VOTER_TYPE_PER_NFT && +param.voter_type !== VOTER_TYPE_PER_ADDR
-            && +param.voter_type !== VOTER_TYPE_TONCOIN) {
+            && +param.voter_type !== VOTER_TYPE_TONCOIN && +param.voter_type !== VOTER_TYPE_PER_OPEN_ADDR) {
             ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "ill voter type");
             return;
         }
