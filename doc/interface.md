@@ -1461,7 +1461,7 @@ Response:
             "ballot_threshold": "xxxxx",
             "items": "10%,20%,30%", // Various options for the proposal
             "results": "1,23,33", // Number of votes for each option
-            "voter_type": 1 // 1: one address, one vote; 2: one NFT, one vote; 3: one SON, one vote
+            "voter_type": 1 // 1: one address(owned NFT), one vote; 2: one NFT, one vote; 3: one SON, one vote; 5: one TON, one vote; 6: one address, one vote
       }
     ]
   }
@@ -1504,7 +1504,7 @@ Response:
             "ballot_threshold": "xxxxx",
             "items": ["10%","20%","30%"], // Various options for the proposal
             "results": ["1","23","33"], // Number of votes for each option
-            "voter_type": 1 // 1: one address, one vote; 2: one NFT, one vote; 3: one SON, one vote; 5: one TON, one vote
+            "voter_type": 1 // 1: one address(owned NFT), one vote; 2: one NFT, one vote; 3: one SON, one vote; 5: one TON, one vote; 6: one address, one vote
       }
     ]
   }
