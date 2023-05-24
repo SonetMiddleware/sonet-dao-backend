@@ -111,13 +111,17 @@ class DAOController extends Controller {
     async queryVotesList() {
         const {ctx} = this;
         let param = ctx.query;
-        ctx.body = data.newNormalResp(await ctx.service.daoService.queryVotesList(param.collection_id, param.proposal_id));
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        ctx.body = data.newNormalResp(await ctx.service.daoService.queryVotesList(param.collection_id, param.proposal_id,
+            limit, offset));
     }
 
     async queryVoteCommentsList() {
         const {ctx} = this;
         let param = ctx.query;
-        ctx.body = data.newNormalResp(await ctx.service.daoService.queryVoteCommentsList(param.collection_id, param.proposal_id));
+        const [limit, offset] = utils.parsePageParamToDBParam(param.page, param.gap);
+        ctx.body = data.newNormalResp(await ctx.service.daoService.queryVoteCommentsList(param.collection_id,
+            param.proposal_id, limit, offset));
     }
 
     async queryProposalPermission() {

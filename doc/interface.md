@@ -1515,7 +1515,7 @@ Response:
 
 Method: GET
 
-URL: /api/v1/votes?proposal_id=xxxx&collection_id=xxx
+URL: /api/v1/votes?proposal_id=xxxx&collection_id=xxx&page=xxx&gap=xxx
 
 returns:
 
@@ -1546,7 +1546,7 @@ returns:
 
 Method: GET
 
-URL: /api/v1/votes/comments?proposal_id=xxxx&collection_id=xxx
+URL: /api/v1/votes/comments?proposal_id=xxxx&collection_id=xxx&page=xxx&gap=xxx
 
 returns:
 

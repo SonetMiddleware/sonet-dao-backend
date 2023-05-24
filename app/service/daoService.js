@@ -232,7 +232,7 @@ class DAOService extends Service {
                 let nft_id = sha256(chain_name + nft.contract + nft.token_id);
                 await this.app.mysql.get('app').query(
                     `replace
-                         into nft_reg
+                    into nft_reg
                      values (?, ?, ?, ?, ?)`, [nft_id, chain_name, nft.contract, nft.token_id, nft.uri]);
             }
         } else {
@@ -533,23 +533,31 @@ class DAOService extends Service {
         return await this.app.mysql.get('app').get('voter', {collection_id: collectionId, id: proposalId, voter});
     }
 
-    async queryVotesList(collectionId, proposalId) {
+    async queryVotesList(collectionId, proposalId, limit, offset) {
         const totalRes = await this.app.mysql.get('app').query(
             'select count(*) as total from voter where collection_id=? and id=?', [collectionId, proposalId]);
         const total = totalRes[0]["total"]
-        const dataRes = await this.app.mysql.get('app').query(
-            'select voter, item, votes as num, comment, vote_time from voter where collection_id=? and id=? order by vote_time desc',
-            [collectionId, proposalId]);
+        let sql = 'select voter, item, votes as num, comment, vote_time from voter where collection_id=? and id=? order by vote_time desc';
+        if (offset && limit) {
+            sql += ' limit ' + offset + ', ' + limit
+        } else if (limit) {
+            sql += ' limit ' + limit;
+        }
+        const dataRes = await this.app.mysql.get('app').query(sql, [collectionId, proposalId]);
         return {total: total, data: dataRes};
     }
 
-    async queryVoteCommentsList(collectionId, proposalId) {
+    async queryVoteCommentsList(collectionId, proposalId, limit, offset) {
         const totalRes = await this.app.mysql.get('app').query(
             'select count(*) as total from voter where collection_id=? and id=? and comment is not null ', [collectionId, proposalId]);
         const total = totalRes[0]["total"]
-        const dataRes = await this.app.mysql.get('app').query(
-            'select comment, vote_time from voter where collection_id=? and id=? and comment is not null order by vote_time desc',
-            [collectionId, proposalId]);
+        let sql = 'select comment, vote_time from voter where collection_id=? and id=? and comment is not null order by vote_time desc';
+        if (offset && limit) {
+            sql += ' limit ' + offset + ', ' + limit
+        } else if (limit) {
+            sql += ' limit ' + limit;
+        }
+        const dataRes = await this.app.mysql.get('app').query(sql, [collectionId, proposalId]);
         return {total: total, data: dataRes};
     }
 
@@ -604,11 +612,11 @@ class DAOService extends Service {
             let appDataDBName = this.app.config.mysql.clients.app.database;
             // update proposal num
             await this.app.mysql.get('chainData').query(
-                `update collection c left join (select collection_id, count(*) as proposal_num
-                                                from ${appDataDBName}.proposal
-                                                group by collection_id) p
-                    on c.collection_id = p.collection_id
-                 set c.proposal_num=p.proposal_num
+                `update collection c left join (select collection_id, count (*) as proposal_num
+                     from ${appDataDBName}.proposal
+                     group by collection_id) p
+                 on c.collection_id = p.collection_id
+                     set c.proposal_num=p.proposal_num
                  where c.collection_id = p.collection_id;`);
         } catch (e) {
             this.app.logger.error('update proposal num, %s', e);
