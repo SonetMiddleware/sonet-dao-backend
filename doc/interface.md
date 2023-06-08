@@ -668,6 +668,101 @@ returns:
 }
 ```
 
+## TG Queue Interface
+
+> note: POST interface requires `TG ROBOT` head verification
+
+### Queue Info
+
+Method: POST
+
+URL: /api/v1/queue
+
+Parameters:
+
+```json
+{
+  "gid": "",
+  "uid": "",
+  "info": ""
+}
+```
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+### Dequeue Info
+
+Method: POST
+
+URL: /api/v1/dequeue
+
+Parameters:
+
+```json
+{
+  "gid": "",
+  "uid": ""
+}
+```
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {}
+}
+```
+
+### Query Info
+
+Method: GET
+
+URL: /api/v1/dequeue?gid=xxx&uid=xxx&page=xxx&gap=xxx
+
+Parameters:
+
+```json
+{
+  "gid": "",
+  "uid": "",
+  "info": ""
+}
+```
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "total": 1000,
+    "data": [
+      {
+        "gid": "",
+        "uid": "",
+        "info": ""
+      },
+      {
+        "gid": "",
+        "uid": "",
+        "info": ""
+      }
+    ]
+  }
+}
+```
+
 ## Invitation code
 
 ### Generate invitation code
