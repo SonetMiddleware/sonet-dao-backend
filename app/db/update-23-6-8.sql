@@ -10,4 +10,12 @@ alter table collection
         primary key (dao_name, collection_id);
 
 
-
+create table queue
+(
+    queue_id bigint auto_increment not null,
+    gid      varchar(32)           not null,
+    uid      varchar(32)           not null,
+    info     mediumtext            not null,
+    primary key (queue_id)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;

@@ -670,7 +670,7 @@ returns:
 
 ## TG Queue Interface
 
-> note: POST interface requires `TG ROBOT` head verification
+> note: these interface requires `TG ROBOT` head verification
 
 ### Queue Info
 
@@ -700,6 +700,8 @@ Returns:
 
 ### Dequeue Info
 
+Remove info.
+
 Method: POST
 
 URL: /api/v1/dequeue
@@ -709,7 +711,8 @@ Parameters:
 ```json
 {
   "gid": "",
-  "uid": ""
+  "uid": "",
+  "count": 10
 }
 ```
 
@@ -719,25 +722,22 @@ Returns:
 {
   "code": "",
   "error": "",
-  "data": {}
+  "data": [
+    "",
+    ""
+  ]
 }
 ```
+
+> return 100 data at most, require param.count <= 100 and param.count > 0
+
+> result is ordered by create time
 
 ### Query Info
 
 Method: GET
 
-URL: /api/v1/dequeue?gid=xxx&uid=xxx&page=xxx&gap=xxx
-
-Parameters:
-
-```json
-{
-  "gid": "",
-  "uid": "",
-  "info": ""
-}
-```
+URL: /api/v1/queue?gid=xxx&uid=xxx&page=xxx&gap=xxx
 
 Returns:
 
@@ -748,18 +748,22 @@ Returns:
   "data": {
     "total": 1000,
     "data": [
-      {
-        "gid": "",
-        "uid": "",
-        "info": ""
-      },
-      {
-        "gid": "",
-        "uid": "",
-        "info": ""
-      }
     ]
   }
+}
+```
+
+### Count
+
+URL: /api/v1/queue/count?gid=xxx&uid=xxx
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": 10000
 }
 ```
 

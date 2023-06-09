@@ -61,4 +61,10 @@ module.exports = app => {
     router.get('/assets/erc-1155/:contracts/:token_id', controller.assetsERC1155.getURIAssets);
     router.get('/assets/ton-collection/:chain_name/:collection_name', controller.nft.getTONCollectionMetadata);
     router.get('/assets/ton-collection/:chain_name/:collection_name/:token_id', controller.nft.getTONCollectionItemMetadata);
+
+    /* cache queue */
+    router.post('/api/v1/queue', controller.queue.queue);
+    router.post('/api/v1/dequeue', controller.queue.dequeue);
+    router.get('/api/v1/queue', controller.queue.fetch);
+    router.get('/api/v1/queue/count', controller.queue.count);
 };
