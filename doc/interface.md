@@ -1223,7 +1223,7 @@ params:
 
 ```
 
-> note: metadata.name should be same as dao collection name, and should be unique
+> note: collection.name should be same as collection name
 >
 > note: should be invoked after collection contract deployed
 
