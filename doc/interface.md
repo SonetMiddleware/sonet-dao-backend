@@ -1285,6 +1285,8 @@ Response:
 
 ### Get user collection list
 
+> > TODO: return multiple dao for each collection
+
 NFTs owned by the user are displayed based on their collections. This endpoint returns information about all collections
 owned by the user.
 
@@ -1377,6 +1379,10 @@ Returns:
 
 ### Query Collection by NFT Contract
 
+> > TODO: filter chain name
+
+> > TODO: return multiple dao
+
 Method: GET
 
 URL: /api/v1/collection?contract=xxx
@@ -1403,6 +1409,8 @@ Returns:
 ```
 
 ### Query Collection Detail
+
+> > TODO: return multiple dao
 
 Method: GET
 
@@ -1434,7 +1442,41 @@ Returns:
 
 > Note: `collection_id` is the contract address. If the DAO does not exist, it will be null.
 
+### Query DAO Detail
+
+Method: GET
+
+URL: /api/v1/dao/:dao_id
+
+Returns:
+
+```json
+{
+  "code": "",
+  "error": "",
+  "data": {
+    "collection_id": "aaaa",
+    "name": "collection 1",
+    "img": "",
+    "dao": {
+      "chain_name": "",
+      "name": "",
+      "start_date": "timestamp",
+      "total_member": "2/200",
+      "facebook": "",
+      "twitter": ""
+    },
+    "contract": "contract address",
+    "enable_other_mint": "bool value, anyone could mint nft item, only active at TON"
+  }
+}
+```
+
+> Note: `collection_id` is the contract address. If the DAO does not exist, it will be null.
+
 ### Get List of DAOs
+
+> > TODO: return multiple dao for each collection
 
 To retrieve a list of DAOs, use the following method:
 
@@ -1462,6 +1504,7 @@ Response:
           "mainnet"
         ],
         "id": "bbbbb",
+        "dao_id": "",
         "name": "",
         "img": "",
         "start_date": "timestamp",
@@ -1485,6 +1528,7 @@ Response:
           "polygon"
         ],
         "id": "ccccc",
+        "dao_id": "",
         "name": "",
         "img": "",
         "start_date": "timestamp",
@@ -1566,6 +1610,8 @@ Response:
   }
 }
 ```
+
+> note: param.dao is collection_id or dao_id, dao_id firstly.
 
 Version 2: To retrieve the proposal list for a given DAO ID, use the following URL:
 
@@ -1707,6 +1753,7 @@ Parameters:
   "creator": "", // Creator address
   "snapshot_block": 777777, // Snapshot block of the proposal area
   "collection_id": "",
+  "dao_id":"",
   "title": "", // Maximum 64 characters
   "description": "0", // Maximum 10240 characters
   "start_time": 123211232113, // Millisecond timestamp
@@ -1717,6 +1764,8 @@ Parameters:
   "sig": "xxxxxxx"
 }
 ```
+
+> note: collection or dao_id must be not empty at same time, dao_id firstly
 
 > Note: sig = web3.eth.sign(web3.utils.soliditySha3("" + snapshot_block, collection_id, title, description, "" +
 >
@@ -1761,7 +1810,7 @@ Params:
 {
   "chain_name": "", // chain name
   "voter": "", // voter address
-  "collection_id": "",
+  "collection_id": "", // must same as dao_id or collection_id used at proposal creation
   "proposal_id": "",
   "item": "approve", // select an item from the items array
   "comment": "xxxxx",
@@ -1799,6 +1848,7 @@ Params:
   "collection_name": "",
   "collection_id": "", // Primary key, ensures each DAO is unique, use the group account name
   "collection_image": "",
+  "dao_id:"", // if not defined, default value is same as collection_id
   "dao_name":"", // Use the group name
   "start_date": 12112121, // Timestamp in milliseconds
   "total_member": 121212, // Number of members in the DAO, pass the current number of group members

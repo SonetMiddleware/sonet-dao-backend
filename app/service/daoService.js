@@ -64,6 +64,7 @@ class DAOService extends Service {
                 collection_name: param.collection_name,
                 collection_id: param.collection_id,
                 collection_img: param.collection_image,
+                dao_id: param.dao_id ? param.dao_id : param.collection_id,
                 dao_name: param.dao_name,
                 start_date: param.start_date,
                 total_member: param.total_member,
@@ -154,6 +155,42 @@ class DAOService extends Service {
         const data = {
             chain_name: this.split(collection.chain_name, ","),
             id: collection.collection_id,
+            name: collection.collection_name,
+            img: collection.collection_img,
+            dao: collection.dao_name ? {
+                name: collection.dao_name,
+                start_date: collection.start_date,
+                total_member: collection.total_member,
+                facebook: collection.facebook,
+                twitter: collection.twitter,
+                centralized: collection.centralized,
+            } : null,
+            contract: !contractMap ? "" : contractMap.contract
+        };
+        if (contractMap && isTONNetwork(contractMap.chain_name)) {
+            const createdCollection = await this.app.mysql.get('app').get('ton_collection_metadata',
+                {
+                    is_mainnet: contractMap.chain_name === CHAIN_NAME_TON_MAINNET,
+                    addr: new Address(contractMap.contract).toString(true, true, false)
+                });
+            if (createdCollection) {
+                data.enable_other_mint = createdCollection.enable_other_mint;
+            } else {
+                data.enable_other_mint = false;
+            }
+        }
+        return data;
+    }
+
+    async queryDAO(daoId) {
+        const collection = await this.app.mysql.get('chainData').get('collection', {dao_id: daoId});
+        if (!collection) {
+            return {};
+        }
+        const contractMap = await this.app.mysql.get('chainData').get('collection_map', {collection_id: collection.collection_id});
+        const data = {
+            chain_name: this.split(collection.chain_name, ","),
+            collection_id: collection.collection_id,
             name: collection.collection_name,
             img: collection.collection_img,
             dao: collection.dao_name ? {

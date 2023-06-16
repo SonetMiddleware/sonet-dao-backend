@@ -40,6 +40,12 @@ class DAOController extends Controller {
         ctx.body = data.newNormalResp(await ctx.service.daoService.queryCollection(collection_id));
     }
 
+    async queryDAO() {
+        const {ctx} = this;
+        let daoId = ctx.params.dao_id;
+        ctx.body = data.newNormalResp(await ctx.service.daoService.queryDAO(daoId));
+    }
+
     async queryCollectionByNFT() {
         const {ctx} = this;
         ctx.validate({
@@ -197,8 +203,9 @@ class DAOController extends Controller {
             }
         }
         try {
+            const collectionId = param.dao_id ? param.dao_id : param.collection_id;
             const id = await ctx.service.daoService.createProposal(param.chain_name, param.creator, param.snapshot_block,
-                param.collection_id, param.title, param.description, param.start_time, param.end_time,
+                collectionId, param.title, param.description, param.start_time, param.end_time,
                 param.ballot_threshold, param.items, param.voter_type);
             ctx.body = data.newNormalResp({id: id});
         } catch (e) {

@@ -38,6 +38,7 @@ module.exports = app => {
     router.get('/api/v1/collection/nfts', controller.dao.queryCollectionNFTs);
     router.get('/api/v1/collection/:collection_id', controller.dao.queryCollection);
     router.get('/api/v1/dao', controller.dao.queryDAOList);
+    router.get('/api/v1/dao/:dao_id', controller.dao.queryDAO);
     router.get('/api/v1/proposal', controller.dao.queryProposalList);
     router.get('/api/v2/proposal', controller.dao.queryProposalListV2);
     router.get('/api/v3/proposal', controller.dao.queryProposalListV3);
