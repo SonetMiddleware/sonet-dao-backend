@@ -371,6 +371,7 @@ class DAOService extends Service {
                 id: item.collection_id,
                 name: item.dao_name,
                 img: item.collection_img,
+                dao_id: item.dao_id,
                 start_date: item.start_date,
                 total_member: item.total_member,
                 facebook: item.facebook,

@@ -1503,7 +1503,7 @@ Response:
         "chain_name": [
           "mainnet"
         ],
-        "id": "bbbbb",
+        "id": "bbbbb", // collection id
         "dao_id": "",
         "name": "",
         "img": "",
@@ -1527,7 +1527,7 @@ Response:
           "mainnet",
           "polygon"
         ],
-        "id": "ccccc",
+        "id": "ccccc", // collection id
         "dao_id": "",
         "name": "",
         "img": "",
