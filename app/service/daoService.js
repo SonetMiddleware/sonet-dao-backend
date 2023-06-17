@@ -606,21 +606,24 @@ class DAOService extends Service {
         return {total: total, data: dataRes};
     }
 
-    async queryProposalPermission(chainName, collection_id, creatorAddr) {
+    async queryProposalPermission(chainName, dao_id, creatorAddr) {
         // query dao
-        const dao = await this.app.mysql.get('chainData').get('collection', {collection_id: collection_id});
+        let dao = await this.app.mysql.get('chainData').get('collection', {dao_id: dao_id});
         if (!dao || !dao.dao_create_block) {
-            throw new Error("dao doesn't exist");
+            dao = await this.app.mysql.get('chainData').get('collection', {collection_id: dao_id});
+            if (!dao || !dao.dao_create_block) {
+                throw new Error("dao doesn't exist");
+            }
         }
         if (dao.centralized) {
             const proposerWhiteList = await this.app.mysql.get('app').get('proposer_white_list', {
-                collection_id: collection_id, proposer: creatorAddr
+                collection_id: dao_id, proposer: creatorAddr
             });
             if (!proposerWhiteList || proposerWhiteList.proposer !== creatorAddr) {
                 return false;
             }
         } else { // TODO: support FLOW and TON decentralized DAO
-            const totalBalance = await this.nftBalance(chainName, creatorAddr, collection_id);
+            const totalBalance = await this.nftBalance(chainName, creatorAddr, dao_id);
             if (totalBalance === 0) {
                 return false;
             }
