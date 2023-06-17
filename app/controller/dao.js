@@ -178,7 +178,8 @@ class DAOController extends Controller {
             return;
         }
         // check sig
-        let message = web3.utils.soliditySha3("" + param.snapshot_block, param.collection_id, param.title,
+        const collectionId = param.dao_id ? param.dao_id : param.collection_id;
+        let message = web3.utils.soliditySha3("" + param.snapshot_block, collectionId, param.title,
             param.description, "" + param.start_time, "" + param.end_time, "" + param.ballot_threshold,
             param.items.join("|"), "" + param.voter_type);
         let valid = false;
@@ -203,7 +204,6 @@ class DAOController extends Controller {
             }
         }
         try {
-            const collectionId = param.dao_id ? param.dao_id : param.collection_id;
             const id = await ctx.service.daoService.createProposal(param.chain_name, param.creator, param.snapshot_block,
                 collectionId, param.title, param.description, param.start_time, param.end_time,
                 param.ballot_threshold, param.items, param.voter_type);
