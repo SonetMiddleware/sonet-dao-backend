@@ -672,10 +672,10 @@ class DAOService extends Service {
         return proposalId;
     }
 
-    async vote(chainName, voter, collectionId, proposalId, item, comment) {
+    async vote(chainName, voter, collectionIdOrDaoId, proposalId, item, comment) {
         // check item
         const dbQuery = await this.app.mysql.get('app').select('proposal', {
-            where: {collection_id: collectionId, id: proposalId},
+            where: {collection_id: collectionIdOrDaoId, id: proposalId},
             columns: ['items', 'start_time', 'end_time', 'voter_type', 'snapshot_block'],
         })
         if (dbQuery.length === 0) {
@@ -693,9 +693,13 @@ class DAOService extends Service {
             throw new Error('illegal time');
         }
         // if dao is centralized, vote 1
-        const dao = await this.app.mysql.get('chainData').get('collection', {collection_id: collectionId});
+        let dao = await this.app.mysql.get('chainData').get('collection', {collection_id: collectionIdOrDaoId});
+        if (!dao) {
+            dao = await this.app.mysql.get('chainData').get('collection', {dao_id: collectionIdOrDaoId});
+        }
         let votes = 1;
         let shouldRecordNFTs = [];
+        const collectionId = dao.collection_id;
         if (!dao.centralized) { // TODO: support FLOW and TON decentralized DAO
             votes = await this.getVotes(voter, chainName, collectionId, proposal.voter_type, proposal.snapshot_block);
         } else if (isFlowNetwork(chainName) || isTONNetwork(chainName)) {
@@ -711,7 +715,7 @@ class DAOService extends Service {
         try {
             // record vote
             await conn.insert('voter', {
-                collection_id: collectionId,
+                collection_id: collectionIdOrDaoId,
                 id: proposalId,
                 voter,
                 item,
@@ -722,7 +726,7 @@ class DAOService extends Service {
             // update proposal update time
             await conn.update('proposal', {
                 update_time: Date.now()
-            }, {where: {collection_id: collectionId, id: proposalId}});
+            }, {where: {collection_id: collectionIdOrDaoId, id: proposalId}});
             // record used nft
             for (const voteId of shouldRecordNFTs) {
                 let tableName = isFlowNetwork(chainName) ? "flow_voter_records" : "ton_voter_records";
