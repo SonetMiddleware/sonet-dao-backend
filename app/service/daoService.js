@@ -8,7 +8,8 @@ const {
     getNodeUrl,
     VOTER_TYPE_PER_ADDR,
     VOTER_TYPE_PER_NFT,
-    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET, CHAIN_NAME_TON_MAINNET, VOTER_TYPE_PER_OPEN_ADDR
+    VOTER_TYPE_TONCOIN, CHAIN_NAME_TON_TESTNET, CHAIN_NAME_TON_MAINNET, VOTER_TYPE_PER_OPEN_ADDR,
+    VOTER_TYPE_PER_NFT_HOLDER_IN_TG_GROUP
 } = require("../utils/constant");
 const {
     getFlowNFTs, isFlowNetwork, getFlowNFTIdsOfAccount, getNFTKinds, isTONNetwork,
@@ -753,7 +754,7 @@ class DAOService extends Service {
         if (voter_type === VOTER_TYPE_TONCOIN && isTONNetwork(chainName)) {
             return {votes: await getTonBalance(chainName, voter), tokenIds: []}
         }
-        if (voter_type !== VOTER_TYPE_PER_ADDR && voter_type !== VOTER_TYPE_PER_NFT) {
+        if (voter_type !== VOTER_TYPE_PER_ADDR && voter_type !== VOTER_TYPE_PER_NFT&& voter_type !== VOTER_TYPE_PER_NFT_HOLDER_IN_TG_GROUP) {
             return {votes: 0, tokenIds: []};
         }
         let collectionNFTIds = [];
@@ -795,7 +796,7 @@ class DAOService extends Service {
             }
         }
         let result = {votes: remainedTokenIds.length, tokenIds: remainedTokenIds};
-        if (voter_type === VOTER_TYPE_PER_ADDR && result.tokenIds.length > 0) {
+        if ((voter_type === VOTER_TYPE_PER_ADDR || voter_type === VOTER_TYPE_PER_NFT_HOLDER_IN_TG_GROUP) && result.tokenIds.length > 0) {
             result.votes = 1;
         }
         return result;

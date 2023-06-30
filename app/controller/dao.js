@@ -168,7 +168,8 @@ class DAOController extends Controller {
         // check voter type
         const voterType = +param.voter_type;
         if (voterType !== constant.VOTER_TYPE_PER_ADDR && voterType !== constant.VOTER_TYPE_PER_NFT
-            && voterType !== constant.VOTER_TYPE_SON && voterType !== constant.VOTER_TYPE_TONCOIN && voterType !== constant.VOTER_TYPE_PER_OPEN_ADDR) {
+            && voterType !== constant.VOTER_TYPE_SON && voterType !== constant.VOTER_TYPE_TONCOIN
+            && voterType !== constant.VOTER_TYPE_PER_OPEN_ADDR && voterType !== constant.VOTER_TYPE_PER_NFT_HOLDER_IN_TG_GROUP) {
             ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "illegal param: voter_type");
             return;
         }
@@ -256,7 +257,8 @@ class DAOController extends Controller {
             chain_name: 'chainName'
         }, param);
         if (+param.voter_type !== VOTER_TYPE_PER_NFT && +param.voter_type !== VOTER_TYPE_PER_ADDR
-            && +param.voter_type !== VOTER_TYPE_TONCOIN && +param.voter_type !== VOTER_TYPE_PER_OPEN_ADDR) {
+            && +param.voter_type !== VOTER_TYPE_TONCOIN && +param.voter_type !== VOTER_TYPE_PER_OPEN_ADDR
+            && +param.voter_type !== constant.VOTER_TYPE_PER_NFT_HOLDER_IN_TG_GROUP) {
             ctx.body = data.newResp(constant.RESP_CODE_ILLEGAL_PARAM, "ill voter type");
             return;
         }

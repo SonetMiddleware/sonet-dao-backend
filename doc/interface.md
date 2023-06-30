@@ -1503,7 +1503,8 @@ Response:
         "chain_name": [
           "mainnet"
         ],
-        "id": "bbbbb", // collection id
+        "id": "bbbbb",
+        // collection id
         "dao_id": "",
         "name": "",
         "img": "",
@@ -1527,7 +1528,8 @@ Response:
           "mainnet",
           "polygon"
         ],
-        "id": "ccccc", // collection id
+        "id": "ccccc",
+        // collection id
         "dao_id": "",
         "name": "",
         "img": "",
@@ -1604,7 +1606,7 @@ Response:
             "ballot_threshold": "xxxxx",
             "items": "10%,20%,30%", // Various options for the proposal
             "results": "1,23,33", // Number of votes for each option
-            "voter_type": 1 // 1: one address(owned NFT), one vote; 2: one NFT, one vote; 3: one SON, one vote; 5: one TON, one vote; 6: one address, one vote
+            "voter_type": 1
       }
     ]
   }
@@ -1612,6 +1614,9 @@ Response:
 ```
 
 > note: param.dao is collection_id or dao_id, dao_id firstly.
+
+> note: voter_type 1: one address(owned NFT), one vote; 2: one NFT, one vote; 3: one SON, one vote; 5: one TON, one
+> vote; 6: one address, one vote; 7: 1 ballot per nft holder in group
 
 Version 2: To retrieve the proposal list for a given DAO ID, use the following URL:
 
@@ -1649,7 +1654,7 @@ Response:
             "ballot_threshold": "xxxxx",
             "items": ["10%","20%","30%"], // Various options for the proposal
             "results": ["1","23","33"], // Number of votes for each option
-            "voter_type": 1 // 1: one address(owned NFT), one vote; 2: one NFT, one vote; 3: one SON, one vote; 5: one TON, one vote; 6: one address, one vote
+            "voter_type": 1
       }
     ]
   }
@@ -1868,7 +1873,7 @@ To determine whether a user can vote on a proposal, follow the process below:
 
 Method: GET
 
-URL: /api/v1/proposal/votes/num?chain_name=xxx&&collection_id=xxx&voter=xxx&voter_typer=xxx&snapshot_block=xxx
+URL: /api/v1/proposal/votes/num?chain_name=xxx&&collection_id=xxx&voter=xxx&voter_type=xxx&snapshot_block=xxx
 
 Returns:
 
@@ -1880,7 +1885,8 @@ Returns:
 }
 ```
 
-> `voter_typer` can only be 1 (one ballot per address owned NFT) or 2 (one ballot per NFT) or 6 (one ballot per address)
+> `voter_type` can only be 1 (one ballot per address owned NFT) or 2 (one ballot per NFT) or 6 (one ballot per address)
+> or 7 (one ballot per nft holder in tg group)
 >
 > If it is a 1155 NFT, the number of votes will be based on the number of 1155 NFTs owned by that address.
 >
@@ -1893,7 +1899,7 @@ to the user.
 
 Method: GET
 
-URL: /api/v1/proposal/votes/num?chain_name=xxx&&collection_id=xxx&voter_typer=xxx&proposal_id=xxx&voter=xxx
+URL: /api/v1/proposal/votes/num?chain_name=xxx&&collection_id=xxx&voter_type=xxx&proposal_id=xxx&voter=xxx
 
 Returns:
 

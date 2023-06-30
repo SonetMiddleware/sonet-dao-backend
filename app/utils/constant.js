@@ -20,6 +20,7 @@ const VOTER_TYPE_SON = 3; // one ballot per SON
 const VOTER_TYPE_OTHER_TOKEN = 4; // ballot for other tokens
 const VOTER_TYPE_TONCOIN = 5; // ballot per TON
 const VOTER_TYPE_PER_OPEN_ADDR = 6; // one ballot per address(anyone)
+const VOTER_TYPE_PER_NFT_HOLDER_IN_TG_GROUP = 7; // one ballot per NFT in TG group
 
 const CHAIN_NAME_MAINNET = "mainnet";
 const CHAIN_NAME_POLYGON = "polygon";
@@ -95,6 +96,7 @@ module.exports = {
     VOTER_TYPE_OTHER_TOKEN,
     VOTER_TYPE_TONCOIN,
     VOTER_TYPE_PER_OPEN_ADDR,
+    VOTER_TYPE_PER_NFT_HOLDER_IN_TG_GROUP,
 
     CHAIN_NAME_MAINNET,
     CHAIN_NAME_POLYGON,
