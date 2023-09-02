@@ -4453,10 +4453,10 @@ flat@^5.0.2:
   resolved "https://registry.npmjs.org/flat/-/flat-5.0.2.tgz"
   integrity sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==
 
-flow-catalog@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.npmjs.org/flow-catalog/-/flow-catalog-0.1.1.tgz"
-  integrity sha512-SuUHf1EpDukWpUa06dFRn41ppLOsrLMsU+172bnxS9Avs5F/ZcmP3jPbUOFTcNrXM4Cnoofng/B5Iv7CGMYtFQ==
+flow-catalog@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.npmmirror.com/flow-catalog/-/flow-catalog-0.2.1.tgz#b5c74a14f86727e1dc0d4e325d06c0ca170bdf7b"
+  integrity sha512-S2a9YGUbePBqbmTu8BxVyvsGySUeTpy8Ead8F7BLOr4bvhFoIlWeZ8pAp8Cv77cSjgtwlCgdmNP0W/O3pjWyfA==
   dependencies:
     "@onflow/fcl" "^1.2.0"
     "@onflow/flow-cadut" "^0.2.0-alpha.8"
