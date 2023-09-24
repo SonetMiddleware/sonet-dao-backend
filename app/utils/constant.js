@@ -56,13 +56,11 @@ function getExplorer(chainName) {
 
 function getNodeUrl(chainName) {
     if (chainName === CHAIN_NAME_MAINNET) {
-        return "https://eth-mainnet.g.alchemy.com/v2/" + env.ALCHEMY_MAINNET;
+        return "https://mainnet.infura.io/v3/" + env.INFURA_KEY;
     } else if (chainName === CHAIN_NAME_POLYGON) {
-        return 'https://polygon-mainnet.g.alchemy.com/v2/' + env.ALCHEMY_POLYGON;
-    } else if (chainName === CHAIN_NAME_RINKEBY) {
-        return 'https://eth-rinkeby.g.alchemy.com/v2/' + env.ALCHEMY_RINKEBY;
+        return "https://polygon-mainnet.infura.io/v3/" + env.INFURA_KEY;
     } else if (chainName === CHAIN_NAME_MUMBAI) {
-        return 'https://polygon-mumbai.g.alchemy.com/v2/' + env.ALCHEMY_MUMBAI;
+        return "https://polygon-mumbai.infura.io/v3/" + env.INFURA_KEY;
     } else if (chainName === CHAIN_NAME_TON_TESTNET) {
         return "https://testnet.toncenter.com/api/v2/jsonRPC"
     } else if (chainName === CHAIN_NAME_TON_MAINNET) {
